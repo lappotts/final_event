@@ -40,38 +40,89 @@ export default function Home() {
         </section>
 
         {/* Images with overlay text section */}
-        <section className="flex flex-wrap justify-center gap-4 mt-12">
-          <div className="relative w-1/3 md:w-1/4">
-            <img
-              src="/images/library.png"
-              alt="Library"
-              className="object-cover custom-image"
-            />
-            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
-              <p style={{ color: 'white', fontSize: '2rem' }} className="text-lg">Reservable Buildings</p>
-            </div>
-          </div>
-          <div className="relative w-1/3 md:w-1/4">
-            <img
-              src="/images/stadium.png" 
-              alt="Stadium"
-              className="object-cover custom-image"
-            />
-            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
-              <p style={{ color: 'white', fontSize: '2rem' }} className="text-lg">Book an Event</p>
-            </div>
-          </div>
-          <div className="relative w-1/3 md:w-1/4">
-            <img
-              src="/images/building.png"
-              alt="Event Space"
-              className="object-cover custom-image"
-            />
-            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
-              <p style={{ color: 'white', fontSize: '2rem' }} className="text-lg">Event Space</p>
-            </div>
-          </div>
-        </section>
+
+<section
+  style={{
+    display: 'grid',
+    gridTemplateColumns: 'repeat(3, 1fr)',
+    gap: '1.5rem',
+    marginTop: '2rem',
+  }}
+>
+  <Link href="/buildings-and-floorplans">
+    <div style={{ position: 'relative', cursor: 'pointer' }}>
+      <img
+        src="/images/library.png"
+        alt="Buildings and floorplans"
+        style={{ width: '100%', objectFit: 'cover', height: '200px' }}
+      />
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        color: 'white'
+      }}>
+        <p style={{ fontSize: '1.5rem' }}>Buildings and floorplans</p>
+      </div>
+    </div>
+  </Link>
+
+  <Link href="/book-an-event">
+    <div style={{ position: 'relative', cursor: 'pointer' }}>
+      <img
+        src="/images/stadium.png"
+        alt="Book an Event"
+        style={{ width: '100%', objectFit: 'cover', height: '200px' }}
+      />
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        color: 'white'
+      }}>
+        <p style={{ fontSize: '1.5rem' }}>Book an Event</p>
+      </div>
+    </div>
+  </Link>
+
+  <Link href="/available-spaces">
+    <div style={{ position: 'relative', cursor: 'pointer' }}>
+      <img
+        src="/images/grove.png"
+        alt="Available Spaces"
+        style={{ width: '100%', objectFit: 'cover', height: '200px' }}
+      />
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        color: 'white'
+      }}>
+        <p style={{ fontSize: '1.5rem' }}>Available Spaces</p>
+      </div>
+    </div>
+  </Link>
+</section>
+
+
       </main>
 
       {/* Footer at the bottom */}
