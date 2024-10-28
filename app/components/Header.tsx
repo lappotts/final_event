@@ -14,10 +14,10 @@ export default function Header() {
         {/* Navigation links on the right */}
         <ul className="flex">
           <li style={{ marginRight: '1.5rem', fontSize: '1.15rem' }}>
-            <Link href="/events" className="hover:underline">Events</Link>
+            <Link href="/" className="hover:underline">Home</Link>
           </li>
           <li style={{ marginRight: '1.5rem', fontSize: '1.15rem' }}>
-            <Link href="/plan-your-visit" className="hover:underline">Plan Your Visit</Link>
+            <Link href="/events" className="hover:underline">Events</Link>
           </li>
           <li style={{ marginRight: '1.5rem', fontSize: '1.15rem' }}>
             <Link href="/event-calendar" className="hover:underline">Events Calendar</Link>
