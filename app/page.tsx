@@ -32,7 +32,7 @@ export default function Home() {
           <p style={{ color: 'black', fontSize: '2rem', marginTop: '2rem', marginBottom: '1.5rem' }} className="text-lg">
             We help you find the perfect venue for your events and manage them efficiently.
           </p>
-          <Link href="/event-calendar">
+          <Link href="/calendar">
             <button style = {{backgroundColor: 'lightblue', marginBottom: '3em' }} className="mt-4 mb-8 px-8 py-3 !bg-blue-500 text-white text-lg font-semibold rounded-lg shadow hover:!bg-blue-600 transition-colors duration-300">
               View Event Calendar
             </button>
