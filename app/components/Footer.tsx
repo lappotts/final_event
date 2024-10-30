@@ -1,8 +1,8 @@
-import Link from 'next/link';
+import Link from "next/link";
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-800 text-white p-6">
+    <footer className="bg-blue-400 text-white p-6">
       <div className="container mx-auto">
         <div className="flex justify-between items-center">
           {/* Contact Info */}
@@ -24,7 +24,9 @@ export default function Footer() {
               <span className="hover:underline cursor-pointer">Contact</span>
             </Link>
             <Link href="/terms">
-              <span className="hover:underline cursor-pointer">Terms of Service</span>
+              <span className="hover:underline cursor-pointer">
+                Terms of Service
+              </span>
             </Link>
           </div>
         </div>
