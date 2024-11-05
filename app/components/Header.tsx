@@ -7,17 +7,19 @@ export default function Header() {
       <nav className="flex justify-between items-center max-w-7xl mx-auto">
         {/* Logo on the left */}
         <div className="flex items-center">
-          <img
-            src="/images/olemiss.png"
-            alt="Event Center Logo"
-            className="h-10 w-auto"
-          />
-          <span
-            style={{ color: "black", fontSize: "1.25rem" }}
-            className="text-lg font-bold"
-          >
-            Ole Miss Event Center
-          </span>
+          <Link href="/" className="flex items-center">
+            <img
+              src="/images/olemiss.png"
+              alt="Event Center Logo"
+              className="h-10 w-auto"
+            />
+            <span
+              style={{ color: "black", fontSize: "1.25rem" }}
+              className="text-lg font-bold ml-2" // Added margin to the left of the text for spacing
+            >
+              Ole Miss Event Center
+            </span>
+          </Link>
         </div>
 
         {/* Navigation links on the right */}
@@ -28,12 +30,12 @@ export default function Header() {
             </Link>
           </li>
           <li style={{ marginRight: "1.5rem", fontSize: "1.15rem" }}>
-            <Link href="/plan-your-visit" className="hover:underline">
+            <Link href="/schedule_event" className="hover:underline">
               Plan Your Visit
             </Link>
           </li>
           <li style={{ marginRight: "1.5rem", fontSize: "1.15rem" }}>
-            <Link href="/event-calendar" className="hover:underline">
+            <Link href="/calendar" className="hover:underline">
               Events Calendar
             </Link>
           </li>
