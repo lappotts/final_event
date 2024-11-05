@@ -47,7 +47,7 @@ export default function Home() {
             We help you find the perfect venue for your events and manage them
             efficiently.
           </p>
-          <Link href="/event-calendar">
+          <Link href="/calendar">
             <button
               style={{ backgroundColor: "lightblue", marginBottom: "3em" }}
               className="mt-4 mb-8 px-8 py-3 !bg-blue-600 text-white text-lg font-semibold rounded-lg shadow hover:!bg-blue-600 transition-colors duration-300"
@@ -67,7 +67,7 @@ export default function Home() {
             marginTop: "2rem",
           }}
         >
-          <Link href="/buildings-and-floorplans">
+          <Link href="/building">
             <div style={{ position: "relative", cursor: "pointer" }}>
               <img
                 src="/images/library.png"
@@ -93,7 +93,7 @@ export default function Home() {
             </div>
           </Link>
 
-          <Link href="/book-an-event">
+          <Link href="/schedule_event">
             <div style={{ position: "relative", cursor: "pointer" }}>
               <img
                 src="/images/stadium.png"
