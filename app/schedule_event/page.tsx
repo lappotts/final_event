@@ -15,8 +15,25 @@ export default function ScheduleEvent() {
     roomNumber: '',
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const today = new Date();
+  const minDate = new Date(today);
+  minDate.setDate(today.getDate() + 2); // Two days ahead
+
+  const formatDate = (date: Date) => {
+    return date.toISOString().split('T')[0];
+  };
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
+
+    // Validate room number to only accept positive integers
+    if (name === 'roomNumber' && value !== '') {
+      const isValid = /^\d+$/.test(value);
+      if (!isValid) return; // Ignore invalid input
+    }
+
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
@@ -25,8 +42,8 @@ export default function ScheduleEvent() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Add form submission logic here
     console.log('Event Scheduled:', formData);
+    // Add form submission logic here
   };
 
   return (
@@ -57,6 +74,7 @@ export default function ScheduleEvent() {
               onChange={handleInputChange}
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              min={formatDate(minDate)} // Restrict minimum date
             />
           </div>
           <div>
@@ -73,26 +91,33 @@ export default function ScheduleEvent() {
           </div>
           <div>
             <label htmlFor="buildingName" className="block text-lg font-medium">Building Name</label>
-            <input
-              type="text"
+            <select
               id="buildingName"
               name="buildingName"
               value={formData.buildingName}
               onChange={handleInputChange}
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
-            />
+            >
+              <option value="">Select a Building</option>
+              <option value="The Pavilion">The Pavilion</option>
+              <option value="Weir Hall">Weir Hall</option>
+              <option value="Conner Hall">Conner Hall</option>
+              <option value="Lamar Hall">Lamar Hall</option>
+            </select>
           </div>
           <div>
             <label htmlFor="roomNumber" className="block text-lg font-medium">Room Number</label>
             <input
-              type="text"
+              type="number"
               id="roomNumber"
               name="roomNumber"
               value={formData.roomNumber}
               onChange={handleInputChange}
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              min="1" // Positive whole numbers only
+              step="1" // Prevent decimals
             />
           </div>
           <div>
@@ -114,4 +139,3 @@ export default function ScheduleEvent() {
     </>
   );
 }
-
