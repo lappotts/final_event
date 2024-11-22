@@ -17,13 +17,10 @@ export default function Footer() {
           <div className="flex flex-col">
             <h4 className="font-bold text-lg">Quick Links</h4>
             {/* Ensure there's no <a> tag inside Link */}
-            <Link href="/about">
+            <Link href="/about_us">
               <span className="hover:underline cursor-pointer">About Us</span>
             </Link>
-            <Link href="/contact">
-              <span className="hover:underline cursor-pointer">Contact</span>
-            </Link>
-            <Link href="/terms">
+            <Link href="/terms_of_service">
               <span className="hover:underline cursor-pointer">
                 Terms of Service
               </span>

@@ -6,7 +6,6 @@ import "../styles.css";
 interface Building {
   name: string;
   image: string; // Path to the image inside public/images folder
-  description: string;
 }
 
 interface BuildingFormProps {
