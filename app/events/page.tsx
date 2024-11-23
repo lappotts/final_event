@@ -1,6 +1,8 @@
 "use client";
 import { useAuth } from "@/context/AuthContext";
 import AdminPage from "./sub-pages/admin-page";
+import WorkerPage from "./sub-pages/worker-page";
+import RegularUserPage from "./sub-pages/regular-user-page";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 
@@ -15,14 +17,14 @@ export default function events() {
 
       <div className="flex-1">
         {user.isAdmin ? (
-          // <p>Welcome, Admin! Here is the admin panel.</p>
-          <div>
-            <AdminPage />
-          </div>
+          <AdminPage />
+        ) : user.isStaff ? (
+          <WorkerPage />
         ) : (
-          <p>Welcome, User! Here is the standard user content.</p>
+          <RegularUserPage />
         )}
       </div>
+
       <Footer />
     </div>
   );

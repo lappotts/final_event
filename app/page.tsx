@@ -119,7 +119,7 @@ export default function Home() {
             </div>
           </Link>
 
-          <Link href="/available_spaces">
+          <Link href="/available-spaces">
             <div style={{ position: "relative", cursor: "pointer" }}>
               <img
                 src="/images/grove.png"
