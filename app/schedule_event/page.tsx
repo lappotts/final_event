@@ -22,13 +22,12 @@ export default function ScheduleEvent() {
 
   const router = useRouter();
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
   const today = new Date();
   const minDate = new Date(today);
   minDate.setDate(today.getDate() + 2); // Two days ahead
 
   const formatDate = (date: Date) => {
-    return date.toISOString().split('T')[0];
+    return date.toISOString().split("T")[0];
   };
 
   const handleInputChange = (
@@ -37,7 +36,7 @@ export default function ScheduleEvent() {
     const { name, value } = e.target;
 
     // Validate room number to only accept positive integers
-    if (name === 'roomNumber' && value !== '') {
+    if (name === "roomNumber" && value !== "") {
       const isValid = /^\d+$/.test(value);
       if (!isValid) return; // Ignore invalid input
     }
@@ -50,34 +49,32 @@ export default function ScheduleEvent() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!user || !user.uid) {
       console.error("User not logged in");
       return;
     }
-  
+
     try {
       // Add event to Firestore "events" collection
       const eventRef = await addDoc(collection(db, "events"), {
         ...formData,
         createdBy: user.uid, // Track which user created the event
-        timestamp: new Date(),
+        timestamp: serverTimestamp(),
         isApproved: false,
       });
-  
+
       // Add the new event ID to the user's `eventIds` array
       const userRef = doc(db, "users", user.uid);
       await updateDoc(userRef, {
         eventIds: [...(user.eventIds || []), eventRef.id],
       });
-  
+
       console.log("Event Scheduled:", formData);
-      router.push('/');
+      router.push("/");
     } catch (error) {
       console.error("Error scheduling event:", error);
     }
-    console.log('Event Scheduled:', formData);
-    // Add form submission logic here
   };
 
   return (
@@ -87,7 +84,9 @@ export default function ScheduleEvent() {
         <h1 className="text-3xl font-bold mb-4">Schedule an Event</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="eventName" className="block text-lg font-medium">Event Name</label>
+            <label htmlFor="eventName" className="block text-lg font-medium">
+              Event Name
+            </label>
             <input
               type="text"
               id="eventName"
@@ -99,7 +98,9 @@ export default function ScheduleEvent() {
             />
           </div>
           <div>
-            <label htmlFor="date" className="block text-lg font-medium">Date</label>
+            <label htmlFor="date" className="block text-lg font-medium">
+              Date
+            </label>
             <input
               type="date"
               id="date"
@@ -107,13 +108,14 @@ export default function ScheduleEvent() {
               value={formData.date}
               onChange={handleInputChange}
               required
-              min={new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split("T")[0]} // Sets min to tomorrow's date
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
               min={formatDate(minDate)} // Restrict minimum date
+              className="w-full px-3 py-2 border border-gray-300 rounded-md"
             />
           </div>
           <div>
-            <label htmlFor="time" className="block text-lg font-medium">Time</label>
+            <label htmlFor="time" className="block text-lg font-medium">
+              Time
+            </label>
             <input
               type="time"
               id="start"
@@ -124,9 +126,10 @@ export default function ScheduleEvent() {
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
             />
           </div>
-          
           <div>
-            <label htmlFor="buildingName" className="block text-lg font-medium">Building Name</label>
+            <label htmlFor="buildingName" className="block text-lg font-medium">
+              Building Name
+            </label>
             <select
               id="buildingName"
               name="buildingName"
@@ -143,7 +146,9 @@ export default function ScheduleEvent() {
             </select>
           </div>
           <div>
-            <label htmlFor="roomNumber" className="block text-lg font-medium">Room Number</label>
+            <label htmlFor="roomNumber" className="block text-lg font-medium">
+              Room Number
+            </label>
             <input
               type="number"
               id="roomNumber"
@@ -157,7 +162,9 @@ export default function ScheduleEvent() {
             />
           </div>
           <div>
-            <label htmlFor="details" className="block text-lg font-medium">Event Details</label>
+            <label htmlFor="details" className="block text-lg font-medium">
+              Event Details
+            </label>
             <textarea
               id="details"
               name="details"
