@@ -7,7 +7,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
-export default function WorkerPage() {
+export default function AdminPage() {
   return (
     <div style={{ padding: "2px" }}>
       <h1 className="text-xl font-bold pt-3 pb-3">Admin Panel</h1>
