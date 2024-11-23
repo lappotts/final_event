@@ -29,6 +29,7 @@ interface UserType {
   isAdmin: boolean;
   isStaff: boolean;
   firstName: string;
+  eventIds?: string[]; 
 }
 
 // Create auth context
@@ -62,9 +63,10 @@ export const AuthContextProvider = ({
         setUser({
           email: authUser.email,
           uid: authUser.uid,
-          isAdmin: userData?.isAdmin || false, // Default to false if isAdmin is undefined
-          isStaff: userData?.isStaff || false, // Default to false is isStaff is undefined
+          isAdmin: userData?.isAdmin || false,
+          isStaff: userData?.isStaff || false,
           firstName: userData.firstName,
+          eventIds: userData.eventIds || [],  // Set event IDs if available
         });
       } else {
         setUser(null);
@@ -93,6 +95,7 @@ export const AuthContextProvider = ({
       email: email,
       isAdmin: false,
       isStaff: false,
+      eventIds: [],  
     });
   };
 
