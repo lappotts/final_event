@@ -50,7 +50,7 @@ export default function Header() {
                 </Link>
               </li>
               <li style={{ marginRight: "1.5rem", fontSize: "1.15rem" }}>
-                <Link href="/about" className="hover:underline">
+                <Link href="/about_us" className="hover:underline">
                   About
                 </Link>
               </li>
