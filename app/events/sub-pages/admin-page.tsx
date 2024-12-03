@@ -8,32 +8,50 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { db } from "@/config/firebase.config";
-import { collection, query, where, getDocs, updateDoc, doc, deleteDoc } from "firebase/firestore";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  updateDoc,
+  doc,
+  deleteDoc,
+  arrayUnion,
+  arrayRemove,
+} from "firebase/firestore";
 
-// Define the structure of the event data
 interface Event {
   id: string;
   eventName: string;
   details: string;
   isApproved: boolean;
+  workers: string[]; // Array of worker user IDs
+}
+
+interface Worker {
+  id: string;
+  firstName: string;
+  lastName: string;
 }
 
 export default function AdminPage() {
   const [events, setEvents] = useState<Event[]>([]);
+  const [workers, setWorkers] = useState<Worker[]>([]);
+  const [workerMap, setWorkerMap] = useState<Record<string, Worker>>({});
 
-  // Fetch unapproved events from Firestore
   useEffect(() => {
     const fetchEvents = async () => {
       try {
         const eventsRef = collection(db, "events");
         const q = query(eventsRef, where("isApproved", "==", false));
         const querySnapshot = await getDocs(q);
-        
+
         const fetchedEvents: Event[] = querySnapshot.docs.map((doc) => ({
           id: doc.id,
+          workers: [],
           ...doc.data(),
-        })) as Event[];
-        
+        })) as unknown as Event[];
+
         setEvents(fetchedEvents);
       } catch (error) {
         console.error("Error fetching events:", error);
@@ -43,12 +61,95 @@ export default function AdminPage() {
     fetchEvents();
   }, []);
 
-  // Function to approve an event
+  useEffect(() => {
+    const fetchWorkers = async () => {
+      try {
+        const usersRef = collection(db, "users");
+        const q = query(usersRef, where("isStaff", "==", true));
+        const querySnapshot = await getDocs(q);
+
+        const fetchedWorkers: Worker[] = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as Worker[];
+
+        setWorkers(fetchedWorkers);
+
+        const workerMap = fetchedWorkers.reduce(
+          (acc, worker) => ({ ...acc, [worker.id]: worker }),
+          {}
+        );
+        setWorkerMap(workerMap);
+      } catch (error) {
+        console.error("Error fetching workers:", error);
+      }
+    };
+
+    fetchWorkers();
+  }, []);
+
+  const handleAssignWorker = async (eventId: string, workerId: string) => {
+    try {
+      // Update the event's workers array
+      const eventRef = doc(db, "events", eventId);
+      await updateDoc(eventRef, {
+        workers: arrayUnion(workerId),
+      });
+
+      // Update the worker's assigned events array
+      const workerRef = doc(db, "users", workerId);
+      await updateDoc(workerRef, {
+        assignedEvents: arrayUnion(eventId),
+      });
+
+      // Update local state
+      setEvents((prevEvents) =>
+        prevEvents.map((event) =>
+          event.id === eventId
+            ? { ...event, workers: [...event.workers, workerId] }
+            : event
+        )
+      );
+
+      console.log(`Worker ${workerId} assigned to event ${eventId}`);
+    } catch (error) {
+      console.error("Error assigning worker:", error);
+    }
+  };
+
+  const handleUnassignWorker = async (eventId: string, workerId: string) => {
+    try {
+      // Remove the worker from the event's workers array
+      const eventRef = doc(db, "events", eventId);
+      await updateDoc(eventRef, {
+        workers: arrayRemove(workerId),
+      });
+
+      // Remove the event ID from the worker's assigned events array
+      const workerRef = doc(db, "users", workerId);
+      await updateDoc(workerRef, {
+        assignedEvents: arrayRemove(eventId),
+      });
+
+      // Update local state
+      setEvents((prevEvents) =>
+        prevEvents.map((event) =>
+          event.id === eventId
+            ? { ...event, workers: event.workers.filter((id) => id !== workerId) }
+            : event
+        )
+      );
+
+      console.log(`Worker ${workerId} unassigned from event ${eventId}`);
+    } catch (error) {
+      console.error("Error unassigning worker:", error);
+    }
+  };
+
   const handleAccept = async (eventId: string) => {
     try {
       const eventRef = doc(db, "events", eventId);
       await updateDoc(eventRef, { isApproved: true });
-      // Update UI by removing the approved event from the list
       setEvents((prevEvents) => prevEvents.filter((event) => event.id !== eventId));
       console.log("Event approved:", eventId);
     } catch (error) {
@@ -60,7 +161,6 @@ export default function AdminPage() {
     try {
       const eventRef = doc(db, "events", eventId);
       await deleteDoc(eventRef);
-      // Update UI by removing the rejected event from the list
       setEvents((prevEvents) => prevEvents.filter((event) => event.id !== eventId));
       console.log("Event rejected and deleted:", eventId);
     } catch (error) {
@@ -92,7 +192,50 @@ export default function AdminPage() {
                 >
                   Reject
                 </button>
-                {/* Add other actions here if needed */}
+              </div>
+
+              <div className="mt-4">
+                <h3 className="font-semibold">Assign Workers</h3>
+                <ul className="mt-2">
+                  {workers.map((worker) => (
+                    <li key={worker.id} className="flex justify-between items-center mb-2">
+                      <span>
+                        {worker.firstName} {worker.lastName}
+                      </span>
+                      <button
+                        className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                        onClick={() => handleAssignWorker(event.id, worker.id)}
+                      >
+                        Assign
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="mt-4">
+                <h3 className="font-semibold">Assigned Workers:</h3>
+                <ul className="mt-2">
+                  {event.workers.length > 0 ? (
+                    event.workers.map((workerId) => (
+                      <li key={workerId} className="flex justify-between items-center">
+                        <span>
+                          {workerMap[workerId]
+                            ? `${workerMap[workerId].firstName} ${workerMap[workerId].lastName}`
+                            : "Worker not found"}
+                        </span>
+                        <button
+                          className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                          onClick={() => handleUnassignWorker(event.id, workerId)}
+                        >
+                          Unassign
+                        </button>
+                      </li>
+                    ))
+                  ) : (
+                    <li>No workers assigned</li>
+                  )}
+                </ul>
               </div>
             </AccordionContent>
           </AccordionItem>
