@@ -119,11 +119,11 @@ export default function Home() {
             </div>
           </Link>
 
-          <Link href="/available_spaces">
+          <Link href="/faq">
             <div style={{ position: "relative", cursor: "pointer" }}>
               <img
                 src="/images/grove.png"
-                alt="Available Spaces"
+                alt="FAQ"
                 style={{ width: "100%", objectFit: "cover", height: "200px" }}
               />
               <div
@@ -140,7 +140,7 @@ export default function Home() {
                   color: "white",
                 }}
               >
-                <p style={{ fontSize: "1.5rem" }}>Available Spaces</p>
+                <p style={{ fontSize: "1.5rem" }}>FAQ</p>
               </div>
             </div>
           </Link>
