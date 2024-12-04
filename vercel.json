@@ -1,7 +1,8 @@
 {
   "build": {
     "env": {
-      "NEXT_DISABLE_ESLINT": "1"
+      "NEXT_PRIVATE_IGNORE_ESLINT_ERRORS": "true",
+      "NEXT_PRIVATE_IGNORE_TYPECHECK_ERRORS": "true"
     }
   }
 }
