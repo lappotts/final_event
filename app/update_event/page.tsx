@@ -23,29 +23,39 @@ export default function UpdateEvent() {
   const eventId = searchParams.get("eventId"); // Extract eventId from URL
 
   useEffect(() => {
-    // Fetch the event details when the page loads
-    const fetchEventDetails = async () => {
-      if (!eventId) {
-        console.error("No eventId provided");
-        return;
+  // Fetch the event details when the page loads
+  const fetchEventDetails = async () => {
+    if (!eventId) {
+      console.error("No eventId provided");
+      return;
+    }
+
+    try {
+      const eventRef = doc(db, "events", eventId);
+      const eventSnapshot = await getDoc(eventRef);
+
+      if (eventSnapshot.exists()) {
+        const eventData = eventSnapshot.data() as {
+          eventName: string;
+          date: string;
+          start: string;
+          details: string;
+          buildingName: string;
+          roomNumber: string;
+        };
+
+        setFormData(eventData);
+      } else {
+        console.error("Event does not exist");
       }
+    } catch (error) {
+      console.error("Error fetching event details:", error);
+    }
+  };
 
-      try {
-        const eventRef = doc(db, "events", eventId);
-        const eventSnapshot = await getDoc(eventRef);
+  fetchEventDetails();
+}, [eventId]);
 
-        if (eventSnapshot.exists()) {
-          setFormData(eventSnapshot.data());
-        } else {
-          console.error("Event does not exist");
-        }
-      } catch (error) {
-        console.error("Error fetching event details:", error);
-      }
-    };
-
-    fetchEventDetails();
-  }, [eventId]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
