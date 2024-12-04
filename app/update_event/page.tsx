@@ -23,39 +23,38 @@ export default function UpdateEvent() {
   const eventId = searchParams.get("eventId"); // Extract eventId from URL
 
   useEffect(() => {
-  // Fetch the event details when the page loads
-  const fetchEventDetails = async () => {
-    if (!eventId) {
-      console.error("No eventId provided");
-      return;
-    }
-
-    try {
-      const eventRef = doc(db, "events", eventId);
-      const eventSnapshot = await getDoc(eventRef);
-
-      if (eventSnapshot.exists()) {
-        const eventData = eventSnapshot.data() as {
-          eventName: string;
-          date: string;
-          start: string;
-          details: string;
-          buildingName: string;
-          roomNumber: string;
-        };
-
-        setFormData(eventData);
-      } else {
-        console.error("Event does not exist");
+    // Fetch the event details when the page loads
+    const fetchEventDetails = async () => {
+      if (!eventId) {
+        console.error("No eventId provided");
+        return;
       }
-    } catch (error) {
-      console.error("Error fetching event details:", error);
-    }
-  };
 
-  fetchEventDetails();
-}, [eventId]);
+      try {
+        const eventRef = doc(db, "events", eventId); // eventId is guaranteed to be non-null here
+        const eventSnapshot = await getDoc(eventRef);
 
+        if (eventSnapshot.exists()) {
+          const eventData = eventSnapshot.data() as {
+            eventName: string;
+            date: string;
+            start: string;
+            details: string;
+            buildingName: string;
+            roomNumber: string;
+          };
+
+          setFormData(eventData);
+        } else {
+          console.error("Event does not exist");
+        }
+      } catch (error) {
+        console.error("Error fetching event details:", error);
+      }
+    };
+
+    fetchEventDetails();
+  }, [eventId]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -70,6 +69,11 @@ export default function UpdateEvent() {
 
     if (!user || !user.uid) {
       console.error("User not logged in");
+      return;
+    }
+
+    if (!eventId) {
+      console.error("No eventId provided");
       return;
     }
 
@@ -95,7 +99,9 @@ export default function UpdateEvent() {
         <h1 className="text-3xl font-bold mb-4">Update Event</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="eventName" className="block text-lg font-medium">Event Name</label>
+            <label htmlFor="eventName" className="block text-lg font-medium">
+              Event Name
+            </label>
             <input
               type="text"
               id="eventName"
@@ -107,7 +113,9 @@ export default function UpdateEvent() {
             />
           </div>
           <div>
-            <label htmlFor="date" className="block text-lg font-medium">Date</label>
+            <label htmlFor="date" className="block text-lg font-medium">
+              Date
+            </label>
             <input
               type="date"
               id="date"
@@ -115,12 +123,16 @@ export default function UpdateEvent() {
               value={formData.date}
               onChange={handleInputChange}
               required
-              min={new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split("T")[0]} // Sets min to tomorrow's date
+              min={new Date(new Date().setDate(new Date().getDate() + 1))
+                .toISOString()
+                .split("T")[0]} // Sets min to tomorrow's date
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
             />
           </div>
           <div>
-            <label htmlFor="time" className="block text-lg font-medium">Time</label>
+            <label htmlFor="time" className="block text-lg font-medium">
+              Time
+            </label>
             <input
               type="time"
               id="start"
@@ -132,7 +144,9 @@ export default function UpdateEvent() {
             />
           </div>
           <div>
-            <label htmlFor="buildingName" className="block text-lg font-medium">Building Name</label>
+            <label htmlFor="buildingName" className="block text-lg font-medium">
+              Building Name
+            </label>
             <input
               type="text"
               id="buildingName"
@@ -144,7 +158,9 @@ export default function UpdateEvent() {
             />
           </div>
           <div>
-            <label htmlFor="roomNumber" className="block text-lg font-medium">Room Number</label>
+            <label htmlFor="roomNumber" className="block text-lg font-medium">
+              Room Number
+            </label>
             <input
               type="text"
               id="roomNumber"
@@ -156,7 +172,9 @@ export default function UpdateEvent() {
             />
           </div>
           <div>
-            <label htmlFor="details" className="block text-lg font-medium">Event Details</label>
+            <label htmlFor="details" className="block text-lg font-medium">
+              Event Details
+            </label>
             <textarea
               id="details"
               name="details"
