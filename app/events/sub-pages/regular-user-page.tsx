@@ -17,6 +17,9 @@ interface Event {
   eventName: string;
   date: string;
   details: string;
+  start: string;       // Start time
+  buildingName: string; // Building name
+  roomNumber: string;   // Room number
 }
 
 export default function RegularUserPage() {
@@ -38,7 +41,12 @@ export default function RegularUserPage() {
 
         const userEvents: Event[] = querySnapshot.docs.map((doc) => ({
           id: doc.id,
-          ...doc.data(),
+          eventName: doc.data().eventName,
+          date: doc.data().date,
+          details: doc.data().details,
+          start: doc.data().start,          // New field
+          buildingName: doc.data().buildingName, // New field
+          roomNumber: doc.data().roomNumber, // New field
         })) as Event[];
 
         setEvents(userEvents);
@@ -57,7 +65,7 @@ export default function RegularUserPage() {
   return (
     <div style={{ padding: "2px" }}>
       <h1 className="text-xl font-bold pt-3 pb-3">Your Events</h1>
-      <p>All your assigned events are:</p>
+      <p>All your events are listed below:</p>
 
       <Accordion type="single" collapsible>
         {events.map((event) => (
@@ -66,6 +74,9 @@ export default function RegularUserPage() {
             <AccordionContent>
               <p><strong>Date:</strong> {event.date}</p>
               <p><strong>Details:</strong> {event.details}</p>
+              <p><strong>Start Time:</strong> {event.start}</p>  {/* Display start time */}
+              <p><strong>Building Name:</strong> {event.buildingName}</p> {/* Display building name */}
+              <p><strong>Room Number:</strong> {event.roomNumber}</p>  {/* Display room number */}
               <div className="flex mt-4">
                 <button
                   className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
