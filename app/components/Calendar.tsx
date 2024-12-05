@@ -1,4 +1,3 @@
-// app/components/Calendar.tsx
 "use client";
 
 import FullCalendar from '@fullcalendar/react';
@@ -33,7 +32,10 @@ export default function Calendar({ events, onEventClick }: CalendarProps) {
       plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
       initialView="dayGridMonth"
       events={calendarEvents} // Use the mapped events
-      eventClick={info => onEventClick(info.event)} // Handle event click
+      eventClick={(info) => {
+        // When an event is clicked, call the onEventClick function
+        onEventClick(info.event.extendedProps.eventData);
+      }}
       eventRender={(info) => {
         const eventElement = info.el;
         eventElement.style.cursor = 'pointer'; // Change the cursor to pointer on hover
@@ -41,3 +43,4 @@ export default function Calendar({ events, onEventClick }: CalendarProps) {
     />
   );
 }
+
