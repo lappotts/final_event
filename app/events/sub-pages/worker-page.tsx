@@ -16,6 +16,9 @@ interface Event {
   eventName: string;
   date: string;
   details: string;
+  building: string;  // New field for building
+  time: string;      // New field for time
+  roomNumber: string; // New field for room number
 }
 
 export default function WorkerPage() {
@@ -36,7 +39,12 @@ export default function WorkerPage() {
 
         const workerEvents: Event[] = querySnapshot.docs.map((doc) => ({
           id: doc.id,
-          ...doc.data(),
+          eventName: doc.data().eventName,
+          date: doc.data().date,
+          details: doc.data().details,
+          building: doc.data().building,  // New field
+          time: doc.data().time,          // New field
+          roomNumber: doc.data().roomNumber, // New field
         })) as Event[];
 
         setEvents(workerEvents);
@@ -60,6 +68,9 @@ export default function WorkerPage() {
             <AccordionContent>
               <p><strong>Date:</strong> {event.date}</p>
               <p><strong>Details:</strong> {event.details}</p>
+              <p><strong>Building:</strong> {event.building}</p>  {/* Display building */}
+              <p><strong>Time:</strong> {event.time}</p>          {/* Display time */}
+              <p><strong>Room Number:</strong> {event.roomNumber}</p> {/* Display room number */}
             </AccordionContent>
           </AccordionItem>
         ))}
@@ -67,3 +78,4 @@ export default function WorkerPage() {
     </div>
   );
 }
+
