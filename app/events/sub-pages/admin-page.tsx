@@ -22,6 +22,10 @@ interface Event {
   id: string;
   eventName: string;
   details: string;
+  date: string;
+  time: string;
+  buildingName: string;
+  buildingNumber: string;
   isApproved: boolean;
   workers: string[];
 }
@@ -49,12 +53,16 @@ export default function AdminPage() {
         const fetchedPendingEvents: Event[] = pendingSnapshot.docs.map((doc) => {
           const eventData = doc.data();
           return {
-            id: doc.id || "", // Make sure id is always a string
-            workers: [], // Ensure default workers array
-            eventName: eventData.eventName || "", // Ensure default values for missing fields
+            id: doc.id || "",
+            workers: [],
+            eventName: eventData.eventName || "",
             details: eventData.details || "",
+            date: eventData.date || "",
+            time: eventData.time || "",
+            buildingName: eventData.buildingName || "",
+            buildingNumber: eventData.buildingNumber || "",
             isApproved: eventData.isApproved || false,
-            ...eventData, // Spread the rest of the fields
+            ...eventData,
           };
         });
         setPendingEvents(fetchedPendingEvents);
@@ -65,12 +73,16 @@ export default function AdminPage() {
         const fetchedAllEvents: Event[] = approvedSnapshot.docs.map((doc) => {
           const eventData = doc.data();
           return {
-            id: doc.id || "", // Make sure id is always a string
-            workers: [], // Ensure default workers array
-            eventName: eventData.eventName || "", // Ensure default values for missing fields
+            id: doc.id || "",
+            workers: [],
+            eventName: eventData.eventName || "",
             details: eventData.details || "",
+            date: eventData.date || "",
+            time: eventData.time || "",
+            buildingName: eventData.buildingName || "",
+            buildingNumber: eventData.buildingNumber || "",
             isApproved: eventData.isApproved || false,
-            ...eventData, // Spread the rest of the fields
+            ...eventData,
           };
         });
         setAllEvents(fetchedAllEvents);
@@ -88,10 +100,9 @@ export default function AdminPage() {
         const fetchedWorkers: Worker[] = querySnapshot.docs.map((doc) => {
           const data = doc.data();
           return {
-            id: doc.id || "", // Make sure id is always a string
-            firstName: data.firstName || "", // Default empty string if firstName is missing
-            lastName: data.lastName || "", // Default empty string if lastName is missing
-            // Add other fields as necessary, using defaults if needed
+            id: doc.id || "",
+            firstName: data.firstName || "",
+            lastName: data.lastName || "",
             ...data,
           };
         });
@@ -113,19 +124,16 @@ export default function AdminPage() {
 
   const handleAssignWorker = async (eventId: string, workerId: string) => {
     try {
-      // Update the event's workers array in Firestore
       const eventRef = doc(db, "events", eventId);
       await updateDoc(eventRef, {
         workers: arrayUnion(workerId),
       });
 
-      // Update the worker's assigned events array in Firestore
       const workerRef = doc(db, "users", workerId);
       await updateDoc(workerRef, {
         assignedEvents: arrayUnion(eventId),
       });
 
-      // Update the local state for the event's workers (for display purposes)
       setAllEvents((prevEvents) =>
         prevEvents.map((event) =>
           event.id === eventId
@@ -134,7 +142,6 @@ export default function AdminPage() {
         )
       );
 
-      // Update the local workers list (but only for that event's context)
       setWorkers((prevWorkers) =>
         prevWorkers.filter((worker) => worker.id !== workerId)
       );
@@ -147,19 +154,16 @@ export default function AdminPage() {
 
   const handleUnassignWorker = async (eventId: string, workerId: string) => {
     try {
-      // Remove the worker from the event's workers array in Firestore
       const eventRef = doc(db, "events", eventId);
       await updateDoc(eventRef, {
         workers: arrayRemove(workerId),
       });
 
-      // Remove the event from the worker's assigned events array in Firestore
       const workerRef = doc(db, "users", workerId);
       await updateDoc(workerRef, {
         assignedEvents: arrayRemove(eventId),
       });
 
-      // Update the local state for events
       setAllEvents((prevEvents) =>
         prevEvents.map((event) =>
           event.id === eventId
@@ -171,7 +175,6 @@ export default function AdminPage() {
         )
       );
 
-      // Add the worker back to the available workers list only if they aren't already there
       const workerToUnassign = workerMap[workerId];
       if (workerToUnassign && !workers.some((w) => w.id === workerId)) {
         setWorkers((prevWorkers) => [...prevWorkers, workerToUnassign]);
@@ -188,10 +191,8 @@ export default function AdminPage() {
       const eventRef = doc(db, "events", eventId);
       await updateDoc(eventRef, { isApproved: true });
 
-      // Ensure that the event has a valid ID before modifying state
       const approvedEvent = pendingEvents.find((event) => event.id === eventId);
       if (approvedEvent && approvedEvent.id) {
-        // Make sure the ID is valid
         const eventToUpdate = { ...approvedEvent, isApproved: true };
         setAllEvents((prevEvents) => [
           ...prevEvents.filter((event) => event.id !== eventId),
@@ -199,7 +200,6 @@ export default function AdminPage() {
         ]);
       }
 
-      // Refresh the event list after approval
       setPendingEvents((prevEvents) =>
         prevEvents.filter((event) => event.id !== eventId)
       );
@@ -218,7 +218,6 @@ export default function AdminPage() {
       const eventRef = doc(db, "events", eventId);
       await deleteDoc(eventRef);
 
-      // Update state
       setAllEvents((prevEvents) => prevEvents.filter((event) => event.id !== eventId));
       setPendingEvents((prevEvents) => prevEvents.filter((event) => event.id !== eventId));
 
@@ -241,6 +240,11 @@ export default function AdminPage() {
               <AccordionTrigger>{event.eventName}</AccordionTrigger>
               <AccordionContent>
                 <p className="mb-4">{event.details}</p>
+                <p><strong>Date:</strong> {event.date}</p>
+                <p><strong>Time:</strong> {event.time}</p>
+                <p><strong>Building Name:</strong> {event.buildingName}</p>
+                <p><strong>Building Number:</strong> {event.buildingNumber}</p>
+
                 <div className="flex space-x-4 mt-4">
                   <button
                     className="bg-green-500 text-white px-6 py-3 rounded text-lg"
@@ -271,45 +275,49 @@ export default function AdminPage() {
             <AccordionItem key={event.id} value={event.id}>
               <AccordionTrigger>{event.eventName}</AccordionTrigger>
               <AccordionContent>
-                <p>{event.details}</p>
-                <div className="flex flex-col space-y-6">
-                  <div>
-                    <h3 className="font-semibold">Assigned Workers</h3>
-                    <ul>
-                      {event.workers.map((workerId) => {
-                        const worker = workerMap[workerId];
-                        return (
-                          <li key={workerId} className="flex justify-between items-center">
-                            <span>{worker?.firstName} {worker?.lastName}</span>
-                            <button
-                              className="bg-red-500 text-white px-4 py-2 rounded"
-                              onClick={() => handleUnassignWorker(event.id, workerId)}
-                            >
-                              Unassign
-                            </button>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">Available Workers</h3>
-                    <ul>
-                      {workers
-                        .filter(worker => !event.workers.includes(worker.id))
-                        .map((worker) => (
-                          <li key={worker.id} className="flex justify-between items-center">
-                            <span>{worker.firstName} {worker.lastName}</span>
-                            <button
-                              className="bg-blue-500 text-white px-6 py-2 rounded"
-                              onClick={() => handleAssignWorker(event.id, worker.id)}
-                            >
-                              Assign
-                            </button>
-                          </li>
-                        ))}
-                    </ul>
-                  </div>
+                <p className="mb-4">{event.details}</p>
+                <p><strong>Date:</strong> {event.date}</p>
+                <p><strong>Time:</strong> {event.time}</p>
+                <p><strong>Building Name:</strong> {event.buildingName}</p>
+                <p><strong>Building Number:</strong> {event.buildingNumber}</p>
+
+                <div className="mt-4">
+                  <h3 className="font-semibold">Assigned Workers</h3>
+                  <ul>
+                    {event.workers.map((workerId) => {
+                      const worker = workerMap[workerId];
+                      return (
+                        <li key={workerId} className="flex justify-between items-center">
+                          <span>{worker?.firstName} {worker?.lastName}</span>
+                          <button
+                            className="bg-red-500 text-white px-4 py-2 rounded"
+                            onClick={() => handleUnassignWorker(event.id, workerId)}
+                          >
+                            Unassign
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+
+                <div className="mt-4">
+                  <h3 className="font-semibold">Available Workers</h3>
+                  <ul>
+                    {workers
+                      .filter((worker) => !event.workers.includes(worker.id))
+                      .map((worker) => (
+                        <li key={worker.id} className="flex justify-between items-center">
+                          <span>{worker.firstName} {worker.lastName}</span>
+                          <button
+                            className="bg-blue-500 text-white px-6 py-2 rounded"
+                            onClick={() => handleAssignWorker(event.id, worker.id)}
+                          >
+                            Assign
+                          </button>
+                        </li>
+                      ))}
+                  </ul>
                 </div>
 
                 <div className="mt-4">
@@ -330,4 +338,5 @@ export default function AdminPage() {
     </div>
   );
 }
+
 
