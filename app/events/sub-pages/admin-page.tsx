@@ -272,28 +272,47 @@ export default function AdminPage() {
               <AccordionTrigger>{event.eventName}</AccordionTrigger>
               <AccordionContent>
                 <p>{event.details}</p>
-                <div className="flex space-x-4 mt-4">
-                  <div>
-                    <h3 className="font-semibold">Assigned Workers</h3>
-                    <ul>
-                      {event.workers.map((workerId) => {
-                        const worker = workerMap[workerId];
-                        return (
-                          <li key={workerId} className="flex justify-between items-center">
-                            <span>{worker?.firstName} {worker?.lastName}</span>
-                            <button
-                              className="bg-red-500 text-white px-4 py-2 rounded"
-                              onClick={() => handleUnassignWorker(event.id, workerId)}
-                            >
-                              Unassign
-                            </button>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </div>
+                <div className="flex flex-col space-y-6">
+  {/* Assigned Workers Section */}
+  <div>
+    <h3 className="font-semibold">Assigned Workers</h3>
+    <ul>
+      {event.workers.map((workerId) => {
+        const worker = workerMap[workerId];
+        return (
+          <li key={workerId} className="flex justify-between items-center">
+            <span>{worker?.firstName} {worker?.lastName}</span>
+            <button
+              className="bg-red-500 text-white px-4 py-2 rounded"
+              onClick={() => handleUnassignWorker(event.id, workerId)}
+            >
+              Unassign
+            </button>
+          </li>
+        );
+      })}
+    </ul>
+  </div>
 
-                  <div>
+  {/* Available Workers Section */}
+  <div>
+    <h3 className="font-semibold">Available Workers</h3>
+    <ul>
+      {workers.map((worker) => (
+        <li key={worker.id} className="flex justify-between items-center">
+          <span>{worker.firstName} {worker.lastName}</span>
+          <button
+            className="bg-blue-500 text-white px-6 py-2 rounded"
+            onClick={() => handleAssignWorker(event.id, worker.id)}
+          >
+            Assign
+          </button>
+        </li>
+      ))}
+    </ul>
+  </div>
+</div>
+
                     <h3 className="font-semibold mt-4">Available Workers</h3>
                     <ul>
                       {workers.map((worker) => (
