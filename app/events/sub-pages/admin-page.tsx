@@ -296,9 +296,11 @@ export default function AdminPage() {
 
   {/* Available Workers Section */}
   <div>
-    <h3 className="font-semibold">Available Workers</h3>
-    <ul>
-      {workers.map((worker) => (
+  <h3 className="font-semibold">Available Workers</h3>
+  <ul>
+    {workers
+      .filter(worker => !event.workers.includes(worker.id)) // Exclude workers already assigned
+      .map((worker) => (
         <li key={worker.id} className="flex justify-between items-center">
           <span>{worker.firstName} {worker.lastName}</span>
           <button
@@ -309,9 +311,9 @@ export default function AdminPage() {
           </button>
         </li>
       ))}
-    </ul>
-  </div>
+  </ul>
 </div>
+
 
 
                 <div className="mt-4">
