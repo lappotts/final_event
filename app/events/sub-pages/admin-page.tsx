@@ -134,9 +134,9 @@ export default function AdminPage() {
       )
     );
 
-    // Remove the worker from the available workers list
+    // Remove the worker from the available workers list for this specific event
     setWorkers((prevWorkers) =>
-      prevWorkers.filter((worker) => worker.id !== workerId)
+      prevWorkers.filter((worker) => worker.id !== workerId || !eventId)
     );
 
     console.log(`Worker ${workerId} successfully assigned to event ${eventId}`);
@@ -144,6 +144,7 @@ export default function AdminPage() {
     console.error("Error assigning worker:", error);
   }
 };
+
 
 
   const handleUnassignWorker = async (eventId: string, workerId: string) => {
