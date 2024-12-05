@@ -112,80 +112,76 @@ export default function AdminPage() {
   }, []);
 
   const handleAssignWorker = async (eventId: string, workerId: string) => {
-  try {
-    // Update the event's workers array in Firestore
-    const eventRef = doc(db, "events", eventId);
-    await updateDoc(eventRef, {
-      workers: arrayUnion(workerId),
-    });
+    try {
+      // Update the event's workers array in Firestore
+      const eventRef = doc(db, "events", eventId);
+      await updateDoc(eventRef, {
+        workers: arrayUnion(workerId),
+      });
 
-    // Update the worker's assigned events array in Firestore
-    const workerRef = doc(db, "users", workerId);
-    await updateDoc(workerRef, {
-      assignedEvents: arrayUnion(eventId),
-    });
+      // Update the worker's assigned events array in Firestore
+      const workerRef = doc(db, "users", workerId);
+      await updateDoc(workerRef, {
+        assignedEvents: arrayUnion(eventId),
+      });
 
-    // Update the local state for the event's workers (for display purposes)
-    setAllEvents((prevEvents) =>
-      prevEvents.map((event) =>
-        event.id === eventId
-          ? { ...event, workers: [...(event.workers || []), workerId] }
-          : event
-      )
-    );
+      // Update the local state for the event's workers (for display purposes)
+      setAllEvents((prevEvents) =>
+        prevEvents.map((event) =>
+          event.id === eventId
+            ? { ...event, workers: [...(event.workers || []), workerId] }
+            : event
+        )
+      );
 
-    // Update the local workers list (but only for that event's context)
-    setWorkers((prevWorkers) =>
-      prevWorkers.filter((worker) => worker.id !== workerId)
-    );
+      // Update the local workers list (but only for that event's context)
+      setWorkers((prevWorkers) =>
+        prevWorkers.filter((worker) => worker.id !== workerId)
+      );
 
-    console.log(`Worker ${workerId} successfully assigned to event ${eventId}`);
-  } catch (error) {
-    console.error("Error assigning worker:", error);
-  }
-};
-
-
-
+      console.log(`Worker ${workerId} successfully assigned to event ${eventId}`);
+    } catch (error) {
+      console.error("Error assigning worker:", error);
+    }
+  };
 
   const handleUnassignWorker = async (eventId: string, workerId: string) => {
-  try {
-    // Remove the worker from the event's workers array in Firestore
-    const eventRef = doc(db, "events", eventId);
-    await updateDoc(eventRef, {
-      workers: arrayRemove(workerId),
-    });
+    try {
+      // Remove the worker from the event's workers array in Firestore
+      const eventRef = doc(db, "events", eventId);
+      await updateDoc(eventRef, {
+        workers: arrayRemove(workerId),
+      });
 
-    // Remove the event from the worker's assigned events array in Firestore
-    const workerRef = doc(db, "users", workerId);
-    await updateDoc(workerRef, {
-      assignedEvents: arrayRemove(eventId),
-    });
+      // Remove the event from the worker's assigned events array in Firestore
+      const workerRef = doc(db, "users", workerId);
+      await updateDoc(workerRef, {
+        assignedEvents: arrayRemove(eventId),
+      });
 
-    // Update the local state for events
-    setAllEvents((prevEvents) =>
-      prevEvents.map((event) =>
-        event.id === eventId
-          ? {
-              ...event,
-              workers: event.workers.filter((id) => id !== workerId),
-            }
-          : event
-      )
-    );
+      // Update the local state for events
+      setAllEvents((prevEvents) =>
+        prevEvents.map((event) =>
+          event.id === eventId
+            ? {
+                ...event,
+                workers: event.workers.filter((id) => id !== workerId),
+              }
+            : event
+        )
+      );
 
-    // Add the worker back to the available workers list only if they aren't already there
-    const workerToUnassign = workerMap[workerId];
-    if (workerToUnassign && !workers.some((w) => w.id === workerId)) {
-      setWorkers((prevWorkers) => [...prevWorkers, workerToUnassign]);
+      // Add the worker back to the available workers list only if they aren't already there
+      const workerToUnassign = workerMap[workerId];
+      if (workerToUnassign && !workers.some((w) => w.id === workerId)) {
+        setWorkers((prevWorkers) => [...prevWorkers, workerToUnassign]);
+      }
+
+      console.log(`Worker ${workerId} successfully unassigned from event ${eventId}`);
+    } catch (error) {
+      console.error("Error unassigning worker:", error);
     }
-
-    console.log(`Worker ${workerId} successfully unassigned from event ${eventId}`);
-  } catch (error) {
-    console.error("Error unassigning worker:", error);
-  }
-};
-
+  };
 
   const handleAcceptEvent = async (eventId: string) => {
     try {
@@ -277,49 +273,44 @@ export default function AdminPage() {
               <AccordionContent>
                 <p>{event.details}</p>
                 <div className="flex flex-col space-y-6">
-  {/* Assigned Workers Section */}
-  <div>
-    <h3 className="font-semibold">Assigned Workers</h3>
-    <ul>
-      {event.workers.map((workerId) => {
-        const worker = workerMap[workerId];
-        return (
-          <li key={workerId} className="flex justify-between items-center">
-            <span>{worker?.firstName} {worker?.lastName}</span>
-            <button
-              className="bg-red-500 text-white px-4 py-2 rounded"
-              onClick={() => handleUnassignWorker(event.id, workerId)}
-            >
-              Unassign
-            </button>
-          </li>
-        );
-      })}
-    </ul>
-  </div>
-
-  {/* Available Workers Section */}
-  <div>
-  <h3 className="font-semibold">Available Workers</h3>
-  <ul>
-    {workers
-      .filter(worker => !event.workers.includes(worker.id)) // Exclude workers already assigned
-      .map((worker) => (
-        <li key={worker.id} className="flex justify-between items-center">
-          <span>{worker.firstName} {worker.lastName}</span>
-          <button
-            className="bg-blue-500 text-white px-6 py-2 rounded"
-            onClick={() => handleAssignWorker(event.id, worker.id)}
-          >
-            Assign
-          </button>
-        </li>
-      ))}
-  </ul>
-</div>
-
-</div>
-
+                  <div>
+                    <h3 className="font-semibold">Assigned Workers</h3>
+                    <ul>
+                      {event.workers.map((workerId) => {
+                        const worker = workerMap[workerId];
+                        return (
+                          <li key={workerId} className="flex justify-between items-center">
+                            <span>{worker?.firstName} {worker?.lastName}</span>
+                            <button
+                              className="bg-red-500 text-white px-4 py-2 rounded"
+                              onClick={() => handleUnassignWorker(event.id, workerId)}
+                            >
+                              Unassign
+                            </button>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">Available Workers</h3>
+                    <ul>
+                      {workers
+                        .filter(worker => !event.workers.includes(worker.id))
+                        .map((worker) => (
+                          <li key={worker.id} className="flex justify-between items-center">
+                            <span>{worker.firstName} {worker.lastName}</span>
+                            <button
+                              className="bg-blue-500 text-white px-6 py-2 rounded"
+                              onClick={() => handleAssignWorker(event.id, worker.id)}
+                            >
+                              Assign
+                            </button>
+                          </li>
+                        ))}
+                    </ul>
+                  </div>
+                </div>
 
                 <div className="mt-4">
                   <button
@@ -339,5 +330,4 @@ export default function AdminPage() {
     </div>
   );
 }
-
 
