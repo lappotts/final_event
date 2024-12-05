@@ -314,6 +314,7 @@ export default function AdminPage() {
   </ul>
 </div>
 
+</div>
 
 
                 <div className="mt-4">
