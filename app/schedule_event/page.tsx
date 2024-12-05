@@ -140,9 +140,11 @@ export default function ScheduleEvent() {
             >
               <option value="">Select a Building</option>
               <option value="The Pavilion">The Pavilion</option>
-              <option value="Weir Hall">Weir Hall</option>
+              <option value="Student Union">Student Union</option>
               <option value="Conner Hall">Conner Hall</option>
               <option value="Lamar Hall">Lamar Hall</option>
+              <option value="Weir Hall">Weir Hall</option>
+              <option value="Ventress Hall">Ventress Hall</option>
             </select>
           </div>
           <div>
