@@ -7,21 +7,25 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 
 interface Event {
+  id: string;
   title: string;
   date: string; // Format: "YYYY-MM-DD"
   start: string; // Format: "HH:mm:ss"
-  end: string;   // Format: "HH:mm:ss"
+  roomNumber: string;
+  buildingName: string;
+  details: string;
 }
 
 interface CalendarProps {
   events: Event[];
+  onEventClick: (event: Event) => void;
 }
 
-export default function Calendar({ events }: CalendarProps) {
+export default function Calendar({ events, onEventClick }: CalendarProps) {
   const calendarEvents = events.map(event => ({
     title: event.title,
     start: `${event.date}T${event.start}`, // Combine date and start time
-    end: `${event.date}T${event.end}`     // Combine date and end time
+    eventData: event // Pass the whole event data to FullCalendar
   }));
 
   return (
@@ -29,6 +33,10 @@ export default function Calendar({ events }: CalendarProps) {
       plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
       initialView="dayGridMonth"
       events={calendarEvents} // Use the mapped events
+      eventClick={(info) => {
+        // When an event is clicked, call the onEventClick function
+        onEventClick(info.event.extendedProps.eventData);
+      }}
     />
   );
 }
