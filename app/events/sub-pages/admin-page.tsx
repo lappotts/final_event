@@ -39,76 +39,77 @@ export default function AdminPage() {
   const [workerMap, setWorkerMap] = useState<Record<string, Worker>>({});
 
   useEffect(() => {
-  const fetchEvents = async () => {
-    try {
-      const eventsRef = collection(db, "events");
+    const fetchEvents = async () => {
+      try {
+        const eventsRef = collection(db, "events");
 
-      // Fetch pending events
-      const pendingQuery = query(eventsRef, where("isApproved", "==", false));
-      const pendingSnapshot = await getDocs(pendingQuery);
-      const fetchedPendingEvents: Event[] = pendingSnapshot.docs.map((doc) => {
-        const eventData = doc.data();
-        return {
-          id: doc.id as string, // Forcefully cast id to string
-          workers: [], // Ensure default workers array
-          eventName: eventData.eventName || "", // Ensure default values for missing fields
-          details: eventData.details || "",
-          isApproved: eventData.isApproved || false,
-          ...eventData, // Spread the rest of the fields
-        };
-      });
-      setPendingEvents(fetchedPendingEvents);
+        // Fetch pending events
+        const pendingQuery = query(eventsRef, where("isApproved", "==", false));
+        const pendingSnapshot = await getDocs(pendingQuery);
+        const fetchedPendingEvents: Event[] = pendingSnapshot.docs.map((doc) => {
+          const eventData = doc.data();
+          return {
+            id: doc.id as string, // Forcefully cast id to string
+            workers: [], // Ensure default workers array
+            eventName: eventData.eventName || "", // Ensure default values for missing fields
+            details: eventData.details || "",
+            isApproved: eventData.isApproved || false,
+            ...eventData, // Spread the rest of the fields
+          };
+        });
+        setPendingEvents(fetchedPendingEvents);
 
-      // Fetch all approved events
-      const approvedQuery = query(eventsRef, where("isApproved", "==", true));
-      const approvedSnapshot = await getDocs(approvedQuery);
-      const fetchedAllEvents: Event[] = approvedSnapshot.docs.map((doc) => {
-        const eventData = doc.data();
-        return {
-          id: doc.id as string, // Forcefully cast id to string
-          workers: [], // Ensure default workers array
-          eventName: eventData.eventName || "", // Ensure default values for missing fields
-          details: eventData.details || "",
-          isApproved: eventData.isApproved || false,
-          ...eventData, // Spread the rest of the fields
-        };
-      });
-      setAllEvents(fetchedAllEvents);
-    } catch (error) {
-      console.error("Error fetching events:", error);
-    }
-  };
+        // Fetch all approved events
+        const approvedQuery = query(eventsRef, where("isApproved", "==", true));
+        const approvedSnapshot = await getDocs(approvedQuery);
+        const fetchedAllEvents: Event[] = approvedSnapshot.docs.map((doc) => {
+          const eventData = doc.data();
+          return {
+            id: doc.id as string, // Forcefully cast id to string
+            workers: [], // Ensure default workers array
+            eventName: eventData.eventName || "", // Ensure default values for missing fields
+            details: eventData.details || "",
+            isApproved: eventData.isApproved || false,
+            ...eventData, // Spread the rest of the fields
+          };
+        });
+        setAllEvents(fetchedAllEvents);
+      } catch (error) {
+        console.error("Error fetching events:", error);
+      }
+    };
 
-  const fetchWorkers = async () => {
-    try {
-      const usersRef = collection(db, "users");
-      const q = query(usersRef, where("isStaff", "==", true));
-      const querySnapshot = await getDocs(q);
+    const fetchWorkers = async () => {
+      try {
+        const usersRef = collection(db, "users");
+        const q = query(usersRef, where("isStaff", "==", true));
+        const querySnapshot = await getDocs(q);
 
-      const fetchedWorkers: Worker[] = querySnapshot.docs.map((doc) => ({
-        id: doc.id as string, // Forcefully cast id to string
-        ...doc.data(),
-      }));
-      setWorkers(fetchedWorkers);
+        const fetchedWorkers: Worker[] = querySnapshot.docs.map((doc) => {
+          const data = doc.data();
+          return {
+            id: doc.id as string, // Forcefully cast id to string
+            firstName: data.firstName || "", // Default empty string if firstName is missing
+            lastName: data.lastName || "", // Default empty string if lastName is missing
+            // Add other fields as necessary, using defaults if needed
+            ...data,
+          };
+        });
+        setWorkers(fetchedWorkers);
 
-      const workerMap = fetchedWorkers.reduce(
-        (acc, worker) => ({ ...acc, [worker.id]: worker }),
-        {}
-      );
-      setWorkerMap(workerMap);
-    } catch (error) {
-      console.error("Error fetching workers:", error);
-    }
-  };
+        const workerMap = fetchedWorkers.reduce(
+          (acc, worker) => ({ ...acc, [worker.id]: worker }),
+          {}
+        );
+        setWorkerMap(workerMap);
+      } catch (error) {
+        console.error("Error fetching workers:", error);
+      }
+    };
 
-  fetchEvents();
-  fetchWorkers();
-}, []);
-
-
-
-
-
+    fetchEvents();
+    fetchWorkers();
+  }, []);
 
   const handleAssignWorker = async (eventId: string, workerId: string) => {
     try {
@@ -256,47 +257,46 @@ export default function AdminPage() {
               <AccordionTrigger>{event.eventName}</AccordionTrigger>
               <AccordionContent>
                 <p>{event.details}</p>
-                <div className="mt-4 space-y-2">
-                  <h3 className="font-semibold">Assigned Workers:</h3>
-                  <ul>
-                    {event.workers.map((workerId) => (
-                      <li key={workerId} className="flex justify-between items-center">
-                        <span>
-                          {workerMap[workerId]
-                            ? `${workerMap[workerId].firstName} ${workerMap[workerId].lastName}`
-                            : "Unknown Worker"}
-                        </span>
-                        <button
-                          className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                          onClick={() => handleUnassignWorker(event.id, workerId)}
-                        >
-                          Unassign
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                  <h3 className="font-semibold mt-4">Assign New Worker:</h3>
-                  <ul>
-                    {workers.map((worker) => (
-                      <li key={worker.id} className="flex justify-between items-center">
-                        <span>
+                <div className="mt-4">
+                  <p>Workers assigned:</p>
+                  {event.workers.length === 0 ? (
+                    <p>No workers assigned.</p>
+                  ) : (
+                    event.workers.map((workerId) => {
+                      const worker = workers.find((w) => w.id === workerId);
+                      return (
+                        <div key={workerId} className="flex justify-between">
+                          <span>{worker?.firstName} {worker?.lastName}</span>
+                          <button
+                            className="bg-red-500 text-white px-4 py-2 rounded"
+                            onClick={() => handleUnassignWorker(event.id, workerId)}
+                          >
+                            Unassign
+                          </button>
+                        </div>
+                      );
+                    })
+                  )}
+                  <div className="mt-4">
+                    <p>Assign a Worker:</p>
+                    <select
+                      onChange={(e) => handleAssignWorker(event.id, e.target.value)}
+                      className="border p-2 rounded"
+                    >
+                      <option value="">Select a worker</option>
+                      {workers.map((worker) => (
+                        <option key={worker.id} value={worker.id}>
                           {worker.firstName} {worker.lastName}
-                        </span>
-                        <button
-                          className="bg-blue-500 text-white px-4 py-2 rounded"
-                          onClick={() => handleAssignWorker(event.id, worker.id)}
-                        >
-                          Assign
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                   <div className="flex space-x-4 mt-4">
                     <button
-                      className="bg-blue-500 text-white px-4 py-2 rounded"
+                      className="bg-red-500 text-white px-4 py-2 rounded"
                       onClick={() => handleDeleteEvent(event.id)}
                     >
-                      Delete Event
+                      Delete
                     </button>
                   </div>
                 </div>
@@ -304,10 +304,9 @@ export default function AdminPage() {
             </AccordionItem>
           ))
         ) : (
-          <p>No events found.</p>
+          <p>No approved events found.</p>
         )}
       </Accordion>
     </div>
   );
 }
-
