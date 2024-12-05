@@ -184,22 +184,32 @@ export default function AdminPage() {
   };
 
   const handleAcceptEvent = async (eventId: string) => {
-    try {
-      const eventRef = doc(db, "events", eventId);
-      await updateDoc(eventRef, { isApproved: true });
+  try {
+    const eventRef = doc(db, "events", eventId);
+    await updateDoc(eventRef, { isApproved: true });
 
-      // Refresh the event list after approval
-      setPendingEvents((prevEvents) =>
-        prevEvents.filter((event) => event.id !== eventId)
-      );
-      const approvedEvent = { ...pendingEvents.find((event) => event.id === eventId), isApproved: true };
-      setAllEvents((prevEvents) => [...prevEvents, approvedEvent]);
-
-      console.log("Event approved:", eventId);
-    } catch (error) {
-      console.error("Error approving event:", error);
+    // Ensure that the event has a valid ID before modifying state
+    const approvedEvent = pendingEvents.find((event) => event.id === eventId);
+    if (approvedEvent && approvedEvent.id) {
+      // Make sure the ID is valid
+      const eventToUpdate = { ...approvedEvent, isApproved: true };
+      setAllEvents((prevEvents) => [
+        ...prevEvents.filter((event) => event.id !== eventId),
+        eventToUpdate,
+      ]);
     }
-  };
+
+    // Refresh the event list after approval
+    setPendingEvents((prevEvents) =>
+      prevEvents.filter((event) => event.id !== eventId)
+    );
+
+    console.log("Event approved:", eventId);
+  } catch (error) {
+    console.error("Error approving event:", error);
+  }
+};
+
 
   const handleDeleteEvent = async (eventId: string) => {
     const confirmed = window.confirm("Are you sure you want to delete this event?");
