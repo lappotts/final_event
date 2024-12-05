@@ -125,7 +125,7 @@ export default function AdminPage() {
       assignedEvents: arrayUnion(eventId),
     });
 
-    // Update the local state for events
+    // Update the local state for the event's workers (for display purposes)
     setAllEvents((prevEvents) =>
       prevEvents.map((event) =>
         event.id === eventId
@@ -134,9 +134,9 @@ export default function AdminPage() {
       )
     );
 
-    // Remove the worker from the available workers list for this specific event
+    // Update the local workers list (but only for that event's context)
     setWorkers((prevWorkers) =>
-      prevWorkers.filter((worker) => worker.id !== workerId || !eventId)
+      prevWorkers.filter((worker) => worker.id !== workerId)
     );
 
     console.log(`Worker ${workerId} successfully assigned to event ${eventId}`);
@@ -144,6 +144,7 @@ export default function AdminPage() {
     console.error("Error assigning worker:", error);
   }
 };
+
 
 
 
