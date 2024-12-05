@@ -112,76 +112,78 @@ export default function AdminPage() {
   }, []);
 
   const handleAssignWorker = async (eventId: string, workerId: string) => {
-    try {
-      // Update the event's workers array in Firestore
-      const eventRef = doc(db, "events", eventId);
-      await updateDoc(eventRef, {
-        workers: arrayUnion(workerId),
-      });
+  try {
+    // Update the event's workers array in Firestore
+    const eventRef = doc(db, "events", eventId);
+    await updateDoc(eventRef, {
+      workers: arrayUnion(workerId),
+    });
 
-      // Update the worker's assigned events array in Firestore
-      const workerRef = doc(db, "users", workerId);
-      await updateDoc(workerRef, {
-        assignedEvents: arrayUnion(eventId),
-      });
+    // Update the worker's assigned events array in Firestore
+    const workerRef = doc(db, "users", workerId);
+    await updateDoc(workerRef, {
+      assignedEvents: arrayUnion(eventId),
+    });
 
-      // Update the local state for events
-      setAllEvents((prevEvents) =>
-        prevEvents.map((event) =>
-          event.id === eventId
-            ? { ...event, workers: [...(event.workers || []), workerId] }
-            : event
-        )
-      );
+    // Update the local state for events
+    setAllEvents((prevEvents) =>
+      prevEvents.map((event) =>
+        event.id === eventId
+          ? { ...event, workers: [...(event.workers || []), workerId] }
+          : event
+      )
+    );
 
-      // Remove the worker from the available workers list
-      setWorkers((prevWorkers) =>
-        prevWorkers.filter((worker) => worker.id !== workerId)
-      );
+    // Remove the worker from the available workers list
+    setWorkers((prevWorkers) =>
+      prevWorkers.filter((worker) => worker.id !== workerId)
+    );
 
-      console.log(`Worker ${workerId} successfully assigned to event ${eventId}`);
-    } catch (error) {
-      console.error("Error assigning worker:", error);
-    }
-  };
+    console.log(`Worker ${workerId} successfully assigned to event ${eventId}`);
+  } catch (error) {
+    console.error("Error assigning worker:", error);
+  }
+};
+
 
   const handleUnassignWorker = async (eventId: string, workerId: string) => {
-    try {
-      // Remove the worker from the event's workers array in Firestore
-      const eventRef = doc(db, "events", eventId);
-      await updateDoc(eventRef, {
-        workers: arrayRemove(workerId),
-      });
+  try {
+    // Remove the worker from the event's workers array in Firestore
+    const eventRef = doc(db, "events", eventId);
+    await updateDoc(eventRef, {
+      workers: arrayRemove(workerId),
+    });
 
-      // Remove the event from the worker's assigned events array in Firestore
-      const workerRef = doc(db, "users", workerId);
-      await updateDoc(workerRef, {
-        assignedEvents: arrayRemove(eventId),
-      });
+    // Remove the event from the worker's assigned events array in Firestore
+    const workerRef = doc(db, "users", workerId);
+    await updateDoc(workerRef, {
+      assignedEvents: arrayRemove(eventId),
+    });
 
-      // Update the local state for events
-      setAllEvents((prevEvents) =>
-        prevEvents.map((event) =>
-          event.id === eventId
-            ? {
-                ...event,
-                workers: event.workers.filter((id) => id !== workerId),
-              }
-            : event
-        )
-      );
+    // Update the local state for events
+    setAllEvents((prevEvents) =>
+      prevEvents.map((event) =>
+        event.id === eventId
+          ? {
+              ...event,
+              workers: event.workers.filter((id) => id !== workerId),
+            }
+          : event
+      )
+    );
 
-      // Add the worker back to the available workers list
-      const workerToUnassign = workerMap[workerId];
-      if (workerToUnassign) {
-        setWorkers((prevWorkers) => [...prevWorkers, workerToUnassign]);
-      }
-
-      console.log(`Worker ${workerId} successfully unassigned from event ${eventId}`);
-    } catch (error) {
-      console.error("Error unassigning worker:", error);
+    // Add the worker back to the available workers list only if they aren't already there
+    const workerToUnassign = workerMap[workerId];
+    if (workerToUnassign && !workers.some((w) => w.id === workerId)) {
+      setWorkers((prevWorkers) => [...prevWorkers, workerToUnassign]);
     }
-  };
+
+    console.log(`Worker ${workerId} successfully unassigned from event ${eventId}`);
+  } catch (error) {
+    console.error("Error unassigning worker:", error);
+  }
+};
+
 
   const handleAcceptEvent = async (eventId: string) => {
     try {
