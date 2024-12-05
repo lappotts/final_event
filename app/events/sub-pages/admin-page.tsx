@@ -313,22 +313,6 @@ export default function AdminPage() {
   </div>
 </div>
 
-                    <h3 className="font-semibold mt-4">Available Workers</h3>
-                    <ul>
-                      {workers.map((worker) => (
-                        <li key={worker.id} className="flex justify-between items-center">
-                          <span>{worker.firstName} {worker.lastName}</span>
-                          <button
-                            className="bg-blue-500 text-white px-6 py-2 rounded"
-                            onClick={() => handleAssignWorker(event.id, worker.id)}
-                          >
-                            Assign
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
 
                 <div className="mt-4">
                   <button
