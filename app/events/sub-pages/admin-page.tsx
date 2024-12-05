@@ -243,10 +243,16 @@ export default function AdminPage() {
                 <p className="mb-4">{event.details}</p>
                 <div className="flex space-x-4 mt-4">
                   <button
-                    className="bg-green-500 text-white px-4 py-2 rounded"
+                    className="bg-green-500 text-white px-6 py-3 rounded text-lg"
                     onClick={() => handleAcceptEvent(event.id)}
                   >
-                    Approve
+                    Approve Event
+                  </button>
+                  <button
+                    className="bg-red-500 text-white px-6 py-3 rounded text-lg"
+                    onClick={() => handleDeleteEvent(event.id)}
+                  >
+                    Delete Event
                   </button>
                 </div>
               </AccordionContent>
@@ -267,50 +273,45 @@ export default function AdminPage() {
               <AccordionContent>
                 <p>{event.details}</p>
                 <div className="flex space-x-4 mt-4">
-                  <h3 className="font-semibold">Assigned Workers</h3>
-                  <ul>
-                    {event.workers.map((workerId) => {
-                      const worker = workerMap[workerId];
-                      return (
-                        <li key={workerId}>
-                          {worker?.firstName} {worker?.lastName}
+                  <div>
+                    <h3 className="font-semibold">Assigned Workers</h3>
+                    <ul>
+                      {event.workers.map((workerId) => {
+                        const worker = workerMap[workerId];
+                        return (
+                          <li key={workerId} className="flex justify-between items-center">
+                            <span>{worker?.firstName} {worker?.lastName}</span>
+                            <button
+                              className="bg-red-500 text-white px-4 py-2 rounded"
+                              onClick={() => handleUnassignWorker(event.id, workerId)}
+                            >
+                              Unassign
+                            </button>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h3 className="font-semibold mt-4">Available Workers</h3>
+                    <ul>
+                      {workers.map((worker) => (
+                        <li key={worker.id} className="flex justify-between items-center">
+                          <span>{worker.firstName} {worker.lastName}</span>
                           <button
-                            className="ml-2 text-red-500"
-                            onClick={() => handleUnassignWorker(event.id, workerId)}
+                            className="bg-blue-500 text-white px-6 py-2 rounded"
+                            onClick={() => handleAssignWorker(event.id, worker.id)}
                           >
-                            Unassign
+                            Assign
                           </button>
                         </li>
-                      );
-                    })}
-                  </ul>
-
-                  <div className="mt-4">
-                    <h3 className="font-semibold">Assign a Worker</h3>
-                    <select
-                      onChange={(e) =>
-                        handleAssignWorker(event.id, e.target.value)
-                      }
-                      defaultValue=""
-                    >
-                      <option value="" disabled>
-                        Select a worker
-                      </option>
-                      {workers
-                        .filter(
-                          (worker) =>
-                            !event.workers.includes(worker.id) // Filter out workers already assigned to the event
-                        )
-                        .map((worker) => (
-                          <option key={worker.id} value={worker.id}>
-                            {worker.firstName} {worker.lastName}
-                          </option>
-                        ))}
-                    </select>
+                      ))}
+                    </ul>
                   </div>
                 </div>
 
-                <div className="flex space-x-4 mt-4">
+                <div className="mt-4">
                   <button
                     className="bg-red-500 text-white px-4 py-2 rounded"
                     onClick={() => handleDeleteEvent(event.id)}
@@ -328,4 +329,5 @@ export default function AdminPage() {
     </div>
   );
 }
+
 
