@@ -184,32 +184,31 @@ export default function AdminPage() {
   };
 
   const handleAcceptEvent = async (eventId: string) => {
-  try {
-    const eventRef = doc(db, "events", eventId);
-    await updateDoc(eventRef, { isApproved: true });
+    try {
+      const eventRef = doc(db, "events", eventId);
+      await updateDoc(eventRef, { isApproved: true });
 
-    // Ensure that the event has a valid ID before modifying state
-    const approvedEvent = pendingEvents.find((event) => event.id === eventId);
-    if (approvedEvent && approvedEvent.id) {
-      // Make sure the ID is valid
-      const eventToUpdate = { ...approvedEvent, isApproved: true };
-      setAllEvents((prevEvents) => [
-        ...prevEvents.filter((event) => event.id !== eventId),
-        eventToUpdate,
-      ]);
+      // Ensure that the event has a valid ID before modifying state
+      const approvedEvent = pendingEvents.find((event) => event.id === eventId);
+      if (approvedEvent && approvedEvent.id) {
+        // Make sure the ID is valid
+        const eventToUpdate = { ...approvedEvent, isApproved: true };
+        setAllEvents((prevEvents) => [
+          ...prevEvents.filter((event) => event.id !== eventId),
+          eventToUpdate,
+        ]);
+      }
+
+      // Refresh the event list after approval
+      setPendingEvents((prevEvents) =>
+        prevEvents.filter((event) => event.id !== eventId)
+      );
+
+      console.log("Event approved:", eventId);
+    } catch (error) {
+      console.error("Error approving event:", error);
     }
-
-    // Refresh the event list after approval
-    setPendingEvents((prevEvents) =>
-      prevEvents.filter((event) => event.id !== eventId)
-    );
-
-    console.log("Event approved:", eventId);
-  } catch (error) {
-    console.error("Error approving event:", error);
-  }
-};
-
+  };
 
   const handleDeleteEvent = async (eventId: string) => {
     const confirmed = window.confirm("Are you sure you want to delete this event?");
@@ -267,48 +266,57 @@ export default function AdminPage() {
               <AccordionTrigger>{event.eventName}</AccordionTrigger>
               <AccordionContent>
                 <p>{event.details}</p>
-                <div className="mt-4">
-                  <p>Workers assigned:</p>
-                  {event.workers.length === 0 ? (
-                    <p>No workers assigned.</p>
-                  ) : (
-                    event.workers.map((workerId) => {
-                      const worker = workers.find((w) => w.id === workerId);
+                <div className="flex space-x-4 mt-4">
+                  <h3 className="font-semibold">Assigned Workers</h3>
+                  <ul>
+                    {event.workers.map((workerId) => {
+                      const worker = workerMap[workerId];
                       return (
-                        <div key={workerId} className="flex justify-between">
-                          <span>{worker?.firstName} {worker?.lastName}</span>
+                        <li key={workerId}>
+                          {worker?.firstName} {worker?.lastName}
                           <button
-                            className="bg-red-500 text-white px-4 py-2 rounded"
+                            className="ml-2 text-red-500"
                             onClick={() => handleUnassignWorker(event.id, workerId)}
                           >
                             Unassign
                           </button>
-                        </div>
+                        </li>
                       );
-                    })
-                  )}
+                    })}
+                  </ul>
+
                   <div className="mt-4">
-                    <p>Assign a Worker:</p>
+                    <h3 className="font-semibold">Assign a Worker</h3>
                     <select
-                      onChange={(e) => handleAssignWorker(event.id, e.target.value)}
-                      className="border p-2 rounded"
+                      onChange={(e) =>
+                        handleAssignWorker(event.id, e.target.value)
+                      }
+                      defaultValue=""
                     >
-                      <option value="">Select a worker</option>
-                      {workers.map((worker) => (
-                        <option key={worker.id} value={worker.id}>
-                          {worker.firstName} {worker.lastName}
-                        </option>
-                      ))}
+                      <option value="" disabled>
+                        Select a worker
+                      </option>
+                      {workers
+                        .filter(
+                          (worker) =>
+                            !event.workers.includes(worker.id) // Filter out workers already assigned to the event
+                        )
+                        .map((worker) => (
+                          <option key={worker.id} value={worker.id}>
+                            {worker.firstName} {worker.lastName}
+                          </option>
+                        ))}
                     </select>
                   </div>
-                  <div className="flex space-x-4 mt-4">
-                    <button
-                      className="bg-red-500 text-white px-4 py-2 rounded"
-                      onClick={() => handleDeleteEvent(event.id)}
-                    >
-                      Delete
-                    </button>
-                  </div>
+                </div>
+
+                <div className="flex space-x-4 mt-4">
+                  <button
+                    className="bg-red-500 text-white px-4 py-2 rounded"
+                    onClick={() => handleDeleteEvent(event.id)}
+                  >
+                    Delete Event
+                  </button>
                 </div>
               </AccordionContent>
             </AccordionItem>
@@ -320,3 +328,4 @@ export default function AdminPage() {
     </div>
   );
 }
+
