@@ -241,9 +241,9 @@ export default function AdminPage() {
               <AccordionContent>
                 <p className="mb-4">{event.details}</p>
                 <p><strong>Date:</strong> {event.date}</p>
-                <p><strong>Time:</strong> {event.time}</p>
+                <p><strong>Time:</strong> {event.start}</p>
                 <p><strong>Building Name:</strong> {event.buildingName}</p>
-                <p><strong>Building Number:</strong> {event.buildingNumber}</p>
+                <p><strong>Room Number:</strong> {event.roomNumber}</p>
 
                 <div className="flex space-x-4 mt-4">
                   <button
@@ -277,9 +277,9 @@ export default function AdminPage() {
               <AccordionContent>
                 <p className="mb-4">{event.details}</p>
                 <p><strong>Date:</strong> {event.date}</p>
-                <p><strong>Time:</strong> {event.time}</p>
+                <p><strong>Time:</strong> {event.start}</p>
                 <p><strong>Building Name:</strong> {event.buildingName}</p>
-                <p><strong>Building Number:</strong> {event.buildingNumber}</p>
+                <p><strong>Room Number:</strong> {event.roomNumber}</p>
 
                 <div className="mt-4">
                   <h3 className="font-semibold">Assigned Workers</h3>
