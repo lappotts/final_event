@@ -23,9 +23,9 @@ interface Event {
   eventName: string;
   details: string;
   date: string;
-  time: string;
+  start: string;
   buildingName: string;
-  buildingNumber: string;
+  roomNumber: string;
   isApproved: boolean;
   workers: string[];
 }
@@ -58,9 +58,9 @@ export default function AdminPage() {
             eventName: eventData.eventName || "",
             details: eventData.details || "",
             date: eventData.date || "",
-            time: eventData.time || "",
+            start: eventData.start || "",
             buildingName: eventData.buildingName || "",
-            buildingNumber: eventData.buildingNumber || "",
+            roomNumber: eventData.roomNumber || "",
             isApproved: eventData.isApproved || false,
             ...eventData,
           };
@@ -78,9 +78,9 @@ export default function AdminPage() {
             eventName: eventData.eventName || "",
             details: eventData.details || "",
             date: eventData.date || "",
-            time: eventData.time || "",
+            start: eventData.start || "",
             buildingName: eventData.buildingName || "",
-            buildingNumber: eventData.buildingNumber || "",
+            roomNumber: eventData.roomNumber || "",
             isApproved: eventData.isApproved || false,
             ...eventData,
           };
