@@ -39,59 +39,66 @@ export default function AdminPage() {
   const [workerMap, setWorkerMap] = useState<Record<string, Worker>>({});
 
   useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        const eventsRef = collection(db, "events");
+  const fetchEvents = async () => {
+    try {
+      const eventsRef = collection(db, "events");
 
-        // Fetch pending events
-        const pendingQuery = query(eventsRef, where("isApproved", "==", false));
-        const pendingSnapshot = await getDocs(pendingQuery);
-        const fetchedPendingEvents: Event[] = pendingSnapshot.docs.map((doc) => ({
-          id: doc.id,
-          workers: [],
-          ...doc.data(),
-        })) as Event[];
-        setPendingEvents(fetchedPendingEvents);
+      // Fetch pending events
+      const pendingQuery = query(eventsRef, where("isApproved", "==", false));
+      const pendingSnapshot = await getDocs(pendingQuery);
+      const fetchedPendingEvents: Event[] = pendingSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        workers: [],
+        eventName: doc.data().eventName || "", // Default value if missing
+        details: doc.data().details || "", // Default value if missing
+        isApproved: doc.data().isApproved || false, // Default value if missing
+        ...doc.data(),
+      })) as Event[];
+      setPendingEvents(fetchedPendingEvents);
 
-        // Fetch all approved events
-        const approvedQuery = query(eventsRef, where("isApproved", "==", true));
-        const approvedSnapshot = await getDocs(approvedQuery);
-        const fetchedAllEvents: Event[] = approvedSnapshot.docs.map((doc) => ({
-          id: doc.id,
-          workers: [],
-          ...doc.data(),
-        })) as Event[];
-        setAllEvents(fetchedAllEvents);
-      } catch (error) {
-        console.error("Error fetching events:", error);
-      }
-    };
+      // Fetch all approved events
+      const approvedQuery = query(eventsRef, where("isApproved", "==", true));
+      const approvedSnapshot = await getDocs(approvedQuery);
+      const fetchedAllEvents: Event[] = approvedSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        workers: [],
+        eventName: doc.data().eventName || "", // Default value if missing
+        details: doc.data().details || "", // Default value if missing
+        isApproved: doc.data().isApproved || false, // Default value if missing
+        ...doc.data(),
+      })) as Event[];
+      setAllEvents(fetchedAllEvents);
+    } catch (error) {
+      console.error("Error fetching events:", error);
+    }
+  };
 
-    const fetchWorkers = async () => {
-      try {
-        const usersRef = collection(db, "users");
-        const q = query(usersRef, where("isStaff", "==", true));
-        const querySnapshot = await getDocs(q);
+  const fetchWorkers = async () => {
+    try {
+      const usersRef = collection(db, "users");
+      const q = query(usersRef, where("isStaff", "==", true));
+      const querySnapshot = await getDocs(q);
 
-        const fetchedWorkers: Worker[] = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        })) as Worker[];
-        setWorkers(fetchedWorkers);
+      const fetchedWorkers: Worker[] = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Worker[];
+      setWorkers(fetchedWorkers);
 
-        const workerMap = fetchedWorkers.reduce(
-          (acc, worker) => ({ ...acc, [worker.id]: worker }),
-          {}
-        );
-        setWorkerMap(workerMap);
-      } catch (error) {
-        console.error("Error fetching workers:", error);
-      }
-    };
+      const workerMap = fetchedWorkers.reduce(
+        (acc, worker) => ({ ...acc, [worker.id]: worker }),
+        {}
+      );
+      setWorkerMap(workerMap);
+    } catch (error) {
+      console.error("Error fetching workers:", error);
+    }
+  };
 
-    fetchEvents();
-    fetchWorkers();
-  }, []);
+  fetchEvents();
+  fetchWorkers();
+}, []);
+
 
   const handleAssignWorker = async (eventId: string, workerId: string) => {
     try {
