@@ -101,6 +101,7 @@ export default function AdminPage() {
 
 
 
+
   const handleAssignWorker = async (eventId: string, workerId: string) => {
     try {
       // Update the event's workers array in Firestore
