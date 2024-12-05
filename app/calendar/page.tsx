@@ -13,27 +13,21 @@ export default function CalendarPage() {
 
   useEffect(() => {
     const fetchEvents = async () => {
-      if (!user || !user.uid) {
-        console.error("User not logged in");
-        return;
-      }
-
       try {
-        // Query to fetch only approved events created by the logged-in user
+        // Query to fetch only approved events (no longer restricted to the logged-in user)
         const eventsCollection = collection(db, "events");
-        const userEventsQuery = query(
+        const approvedEventsQuery = query(
           eventsCollection,
-          where("isApproved", "==", true),
-          where("createdBy", "==", user.uid) // Filter by the current user's UID
+          where("isApproved", "==", true) // Fetch only approved events
         );
-        const eventsSnapshot = await getDocs(userEventsQuery);
+        const eventsSnapshot = await getDocs(approvedEventsQuery);
 
         const eventsData = eventsSnapshot.docs.map(doc => {
           const event = doc.data();
           return {
-            title: event.eventName || 'Untitled Event', 
+            title: event.eventName || 'Untitled Event',
             date: event.date,
-            start: event.start || '00:00', 
+            start: event.start || '00:00',
             end: event.end || '23:59',
           };
         });
@@ -51,9 +45,10 @@ export default function CalendarPage() {
     <div>
       <Header />
       <div className="p-8">
-        <h1 className="text-3xl font-bold mb-4">My Events</h1>
+        <h1 className="text-3xl font-bold mb-4">All Approved Events</h1>
         <Calendar events={events} />
       </div>
     </div>
   );
 }
+
