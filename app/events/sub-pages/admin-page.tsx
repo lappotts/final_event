@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useEffect, useState } from "react";
 import {
   Accordion,
@@ -25,7 +23,7 @@ interface Event {
   eventName: string;
   details: string;
   isApproved: boolean;
-  workers: string[]; // Array of worker user IDs
+  workers: string[];
 }
 
 interface Worker {
@@ -35,7 +33,8 @@ interface Worker {
 }
 
 export default function AdminPage() {
-  const [events, setEvents] = useState<Event[]>([]);
+  const [pendingEvents, setPendingEvents] = useState<Event[]>([]);
+  const [allEvents, setAllEvents] = useState<Event[]>([]);
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [workerMap, setWorkerMap] = useState<Record<string, Worker>>({});
 
@@ -43,30 +42,31 @@ export default function AdminPage() {
     const fetchEvents = async () => {
       try {
         const eventsRef = collection(db, "events");
-        const q = query(eventsRef, where("isApproved", "==", false));
-        const querySnapshot = await getDocs(q);
 
-        const fetchedEvents: Event[] = querySnapshot.docs.map((doc) => {
-          const data = doc.data();
-          return {
-            id: doc.id,
-            workers: [],
-            eventName: data.eventName || "",  // Ensure these fields are included
-            details: data.details || "",      // Ensure these fields are included
-            isApproved: data.isApproved || false,  // Ensure these fields are included
-          };
-        });
+        // Fetch pending events
+        const pendingQuery = query(eventsRef, where("isApproved", "==", false));
+        const pendingSnapshot = await getDocs(pendingQuery);
+        const fetchedPendingEvents: Event[] = pendingSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          workers: [],
+          ...doc.data(),
+        })) as Event[];
+        setPendingEvents(fetchedPendingEvents);
 
-        setEvents(fetchedEvents);
+        // Fetch all approved events
+        const approvedQuery = query(eventsRef, where("isApproved", "==", true));
+        const approvedSnapshot = await getDocs(approvedQuery);
+        const fetchedAllEvents: Event[] = approvedSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          workers: [],
+          ...doc.data(),
+        })) as Event[];
+        setAllEvents(fetchedAllEvents);
       } catch (error) {
         console.error("Error fetching events:", error);
       }
     };
 
-    fetchEvents();
-  }, []);
-
-  useEffect(() => {
     const fetchWorkers = async () => {
       try {
         const usersRef = collection(db, "users");
@@ -77,7 +77,6 @@ export default function AdminPage() {
           id: doc.id,
           ...doc.data(),
         })) as Worker[];
-
         setWorkers(fetchedWorkers);
 
         const workerMap = fetchedWorkers.reduce(
@@ -90,33 +89,39 @@ export default function AdminPage() {
       }
     };
 
+    fetchEvents();
     fetchWorkers();
   }, []);
 
   const handleAssignWorker = async (eventId: string, workerId: string) => {
     try {
-      // Update the event's workers array
+      // Update the event's workers array in Firestore
       const eventRef = doc(db, "events", eventId);
       await updateDoc(eventRef, {
         workers: arrayUnion(workerId),
       });
 
-      // Update the worker's assigned events array
+      // Update the worker's assigned events array in Firestore
       const workerRef = doc(db, "users", workerId);
       await updateDoc(workerRef, {
         assignedEvents: arrayUnion(eventId),
       });
 
-      // Update local state
-      setEvents((prevEvents) =>
+      // Update the local state for events
+      setAllEvents((prevEvents) =>
         prevEvents.map((event) =>
           event.id === eventId
-            ? { ...event, workers: [...event.workers, workerId] }
+            ? { ...event, workers: [...(event.workers || []), workerId] }
             : event
         )
       );
 
-      console.log(`Worker ${workerId} assigned to event ${eventId}`);
+      // Remove the worker from the available workers list
+      setWorkers((prevWorkers) =>
+        prevWorkers.filter((worker) => worker.id !== workerId)
+      );
+
+      console.log(`Worker ${workerId} successfully assigned to event ${eventId}`);
     } catch (error) {
       console.error("Error assigning worker:", error);
     }
@@ -124,110 +129,125 @@ export default function AdminPage() {
 
   const handleUnassignWorker = async (eventId: string, workerId: string) => {
     try {
-      // Remove the worker from the event's workers array
+      // Remove the worker from the event's workers array in Firestore
       const eventRef = doc(db, "events", eventId);
       await updateDoc(eventRef, {
         workers: arrayRemove(workerId),
       });
 
-      // Remove the event ID from the worker's assigned events array
+      // Remove the event from the worker's assigned events array in Firestore
       const workerRef = doc(db, "users", workerId);
       await updateDoc(workerRef, {
         assignedEvents: arrayRemove(eventId),
       });
 
-      // Update local state
-      setEvents((prevEvents) =>
+      // Update the local state for events
+      setAllEvents((prevEvents) =>
         prevEvents.map((event) =>
           event.id === eventId
-            ? { ...event, workers: event.workers.filter((id) => id !== workerId) }
+            ? {
+                ...event,
+                workers: event.workers.filter((id) => id !== workerId),
+              }
             : event
         )
       );
 
-      console.log(`Worker ${workerId} unassigned from event ${eventId}`);
+      // Add the worker back to the available workers list
+      const workerToUnassign = workerMap[workerId];
+      if (workerToUnassign) {
+        setWorkers((prevWorkers) => [...prevWorkers, workerToUnassign]);
+      }
+
+      console.log(`Worker ${workerId} successfully unassigned from event ${eventId}`);
     } catch (error) {
       console.error("Error unassigning worker:", error);
     }
   };
 
-  const handleAccept = async (eventId: string) => {
+  const handleAcceptEvent = async (eventId: string) => {
     try {
       const eventRef = doc(db, "events", eventId);
       await updateDoc(eventRef, { isApproved: true });
-      setEvents((prevEvents) => prevEvents.filter((event) => event.id !== eventId));
+
+      // Refresh the event list after approval
+      setPendingEvents((prevEvents) =>
+        prevEvents.filter((event) => event.id !== eventId)
+      );
+      const approvedEvent = { ...pendingEvents.find((event) => event.id === eventId), isApproved: true };
+      setAllEvents((prevEvents) => [...prevEvents, approvedEvent]);
+
       console.log("Event approved:", eventId);
     } catch (error) {
       console.error("Error approving event:", error);
     }
   };
 
-  const handleReject = async (eventId: string) => {
+  const handleDeleteEvent = async (eventId: string) => {
+    const confirmed = window.confirm("Are you sure you want to delete this event?");
+    if (!confirmed) return;
+
     try {
       const eventRef = doc(db, "events", eventId);
       await deleteDoc(eventRef);
-      setEvents((prevEvents) => prevEvents.filter((event) => event.id !== eventId));
-      console.log("Event rejected and deleted:", eventId);
+
+      // Update state
+      setAllEvents((prevEvents) => prevEvents.filter((event) => event.id !== eventId));
+      setPendingEvents((prevEvents) => prevEvents.filter((event) => event.id !== eventId));
+
+      console.log("Event deleted:", eventId);
     } catch (error) {
-      console.error("Error rejecting event:", error);
+      console.error("Error deleting event:", error);
     }
   };
 
   return (
     <div style={{ padding: "2px" }}>
       <h1 className="text-xl font-bold pt-3 pb-3">Admin Panel</h1>
-      <p>All the pending events are below:</p>
 
+      {/* Pending Events Section */}
+      <h2 className="text-lg font-semibold">Pending Events</h2>
       <Accordion type="single" collapsible>
-        {events.map((event) => (
-          <AccordionItem key={event.id} value={event.id}>
-            <AccordionTrigger>{event.eventName}</AccordionTrigger>
-            <AccordionContent>
-              <p>{event.details}</p>
-              <div className="flex space-x-4 mt-4">
-                <button
-                  className="bg-green-500 text-white px-4 py-2 rounded"
-                  onClick={() => handleAccept(event.id)}
-                >
-                  Accept
-                </button>
-                <button
-                  className="bg-red-500 text-white px-4 py-2 rounded"
-                  onClick={() => handleReject(event.id)}
-                >
-                  Reject
-                </button>
-              </div>
+        {pendingEvents && pendingEvents.length > 0 ? (
+          pendingEvents.map((event) => (
+            <AccordionItem key={event.id} value={event.id}>
+              <AccordionTrigger>{event.eventName}</AccordionTrigger>
+              <AccordionContent>
+                <p>{event.details}</p>
+                <div className="flex space-x-4 mt-4">
+                  <button
+                    className="bg-green-500 text-white px-4 py-2 rounded"
+                    onClick={() => handleAcceptEvent(event.id)}
+                  >
+                    Approve
+                  </button>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          ))
+        ) : (
+          <p>No pending events found.</p>
+        )}
+      </Accordion>
 
-              <div className="mt-4">
-                <h3 className="font-semibold">Assign Workers</h3>
-                <ul className="mt-2">
-                  {workers.map((worker) => (
-                    <li key={worker.id} className="flex justify-between items-center mb-2">
-                      <span>
-                        {worker.firstName} {worker.lastName}
-                      </span>
-                      <button
-                        className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
-                        onClick={() => handleAssignWorker(event.id, worker.id)}
-                      >
-                        Assign
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="mt-4">
-                <h3 className="font-semibold">Assigned Workers:</h3>
-                <ul className="mt-2">
-                  {event.workers.length > 0 ? (
-                    event.workers.map((workerId) => (
+      {/* All Events Section */}
+      <h2 className="text-lg font-semibold mt-6">All Events</h2>
+      <Accordion type="single" collapsible>
+        {allEvents && allEvents.length > 0 ? (
+          allEvents.map((event) => (
+            <AccordionItem key={event.id} value={event.id}>
+              <AccordionTrigger>{event.eventName}</AccordionTrigger>
+              <AccordionContent>
+                <p>{event.details}</p>
+                <div className="mt-4 space-y-2">
+                  <h3 className="font-semibold">Assigned Workers:</h3>
+                  <ul>
+                    {event.workers.map((workerId) => (
                       <li key={workerId} className="flex justify-between items-center">
                         <span>
                           {workerMap[workerId]
                             ? `${workerMap[workerId].firstName} ${workerMap[workerId].lastName}`
-                            : "Worker not found"}
+                            : "Unknown Worker"}
                         </span>
                         <button
                           className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
@@ -236,15 +256,39 @@ export default function AdminPage() {
                           Unassign
                         </button>
                       </li>
-                    ))
-                  ) : (
-                    <li>No workers assigned</li>
-                  )}
-                </ul>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        ))}
+                    ))}
+                  </ul>
+                  <h3 className="font-semibold mt-4">Assign New Worker:</h3>
+                  <ul>
+                    {workers.map((worker) => (
+                      <li key={worker.id} className="flex justify-between items-center">
+                        <span>
+                          {worker.firstName} {worker.lastName}
+                        </span>
+                        <button
+                          className="bg-blue-500 text-white px-4 py-2 rounded"
+                          onClick={() => handleAssignWorker(event.id, worker.id)}
+                        >
+                          Assign
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="flex space-x-4 mt-4">
+                    <button
+                      className="bg-blue-500 text-white px-4 py-2 rounded"
+                      onClick={() => handleDeleteEvent(event.id)}
+                    >
+                      Delete Event
+                    </button>
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          ))
+        ) : (
+          <p>No events found.</p>
+        )}
       </Accordion>
     </div>
   );
