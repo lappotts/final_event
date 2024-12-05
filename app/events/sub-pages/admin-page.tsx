@@ -49,7 +49,7 @@ export default function AdminPage() {
         const fetchedPendingEvents: Event[] = pendingSnapshot.docs.map((doc) => {
           const eventData = doc.data();
           return {
-            id: doc.id as string, // Forcefully cast id to string
+            id: doc.id || "", // Make sure id is always a string
             workers: [], // Ensure default workers array
             eventName: eventData.eventName || "", // Ensure default values for missing fields
             details: eventData.details || "",
@@ -65,7 +65,7 @@ export default function AdminPage() {
         const fetchedAllEvents: Event[] = approvedSnapshot.docs.map((doc) => {
           const eventData = doc.data();
           return {
-            id: doc.id as string, // Forcefully cast id to string
+            id: doc.id || "", // Make sure id is always a string
             workers: [], // Ensure default workers array
             eventName: eventData.eventName || "", // Ensure default values for missing fields
             details: eventData.details || "",
@@ -88,7 +88,7 @@ export default function AdminPage() {
         const fetchedWorkers: Worker[] = querySnapshot.docs.map((doc) => {
           const data = doc.data();
           return {
-            id: doc.id as string, // Forcefully cast id to string
+            id: doc.id || "", // Make sure id is always a string
             firstName: data.firstName || "", // Default empty string if firstName is missing
             lastName: data.lastName || "", // Default empty string if lastName is missing
             // Add other fields as necessary, using defaults if needed
@@ -249,7 +249,7 @@ export default function AdminPage() {
       </Accordion>
 
       {/* All Events Section */}
-      <h2 className="text-lg font-semibold mt-6">All Events</h2>
+      <h2 className="text-lg font-semibold mt-6">Approved Events</h2>
       <Accordion type="single" collapsible>
         {allEvents && allEvents.length > 0 ? (
           allEvents.map((event) => (
