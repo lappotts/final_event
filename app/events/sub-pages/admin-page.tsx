@@ -46,27 +46,33 @@ export default function AdminPage() {
       // Fetch pending events
       const pendingQuery = query(eventsRef, where("isApproved", "==", false));
       const pendingSnapshot = await getDocs(pendingQuery);
-      const fetchedPendingEvents: Event[] = pendingSnapshot.docs.map((doc) => ({
-        id: doc.id, // Ensure id is always defined
-        workers: [],
-        eventName: doc.data().eventName || "", // Default value if missing
-        details: doc.data().details || "", // Default value if missing
-        isApproved: doc.data().isApproved || false, // Default value if missing
-        ...doc.data(),
-      })) as Event[]; // Assert as Event[] type
+      const fetchedPendingEvents: Event[] = pendingSnapshot.docs.map((doc) => {
+        const eventData = doc.data();
+        return {
+          id: doc.id as string, // Forcefully cast id to string
+          workers: [], // Ensure default workers array
+          eventName: eventData.eventName || "", // Ensure default values for missing fields
+          details: eventData.details || "",
+          isApproved: eventData.isApproved || false,
+          ...eventData, // Spread the rest of the fields
+        };
+      });
       setPendingEvents(fetchedPendingEvents);
 
       // Fetch all approved events
       const approvedQuery = query(eventsRef, where("isApproved", "==", true));
       const approvedSnapshot = await getDocs(approvedQuery);
-      const fetchedAllEvents: Event[] = approvedSnapshot.docs.map((doc) => ({
-        id: doc.id, // Ensure id is always defined
-        workers: [],
-        eventName: doc.data().eventName || "", // Default value if missing
-        details: doc.data().details || "", // Default value if missing
-        isApproved: doc.data().isApproved || false, // Default value if missing
-        ...doc.data(),
-      })) as Event[]; // Assert as Event[] type
+      const fetchedAllEvents: Event[] = approvedSnapshot.docs.map((doc) => {
+        const eventData = doc.data();
+        return {
+          id: doc.id as string, // Forcefully cast id to string
+          workers: [], // Ensure default workers array
+          eventName: eventData.eventName || "", // Ensure default values for missing fields
+          details: eventData.details || "",
+          isApproved: eventData.isApproved || false,
+          ...eventData, // Spread the rest of the fields
+        };
+      });
       setAllEvents(fetchedAllEvents);
     } catch (error) {
       console.error("Error fetching events:", error);
@@ -80,9 +86,9 @@ export default function AdminPage() {
       const querySnapshot = await getDocs(q);
 
       const fetchedWorkers: Worker[] = querySnapshot.docs.map((doc) => ({
-        id: doc.id, // Ensure id is always defined
+        id: doc.id as string, // Forcefully cast id to string
         ...doc.data(),
-      })) as Worker[];
+      }));
       setWorkers(fetchedWorkers);
 
       const workerMap = fetchedWorkers.reduce(
@@ -98,6 +104,7 @@ export default function AdminPage() {
   fetchEvents();
   fetchWorkers();
 }, []);
+
 
 
 
