@@ -229,18 +229,18 @@ export default function AdminPage() {
   };
 
   return (
-    <div style={{ padding: "2px" }}>
-      <h1 className="text-xl font-bold pt-3 pb-3">Admin Panel</h1>
+    <div className="p-6">
+      <h1 className="text-2xl font-bold pb-6">Admin Panel</h1>
 
       {/* Pending Events Section */}
-      <h2 className="text-lg font-semibold">Pending Events</h2>
+      <h2 className="text-xl font-semibold mb-4">Pending Events</h2>
       <Accordion type="single" collapsible>
         {pendingEvents && pendingEvents.length > 0 ? (
           pendingEvents.map((event) => (
             <AccordionItem key={event.id} value={event.id}>
               <AccordionTrigger>{event.eventName}</AccordionTrigger>
               <AccordionContent>
-                <p>{event.details}</p>
+                <p className="mb-4">{event.details}</p>
                 <div className="flex space-x-4 mt-4">
                   <button
                     className="bg-green-500 text-white px-4 py-2 rounded"
@@ -257,8 +257,8 @@ export default function AdminPage() {
         )}
       </Accordion>
 
-      {/* All Events Section */}
-      <h2 className="text-lg font-semibold mt-6">Approved Events</h2>
+      {/* Approved Events Section */}
+      <h2 className="text-xl font-semibold mt-8 mb-4">Approved Events</h2>
       <Accordion type="single" collapsible>
         {allEvents && allEvents.length > 0 ? (
           allEvents.map((event) => (
