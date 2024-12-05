@@ -1,4 +1,3 @@
-// app/pages/CalendarPage.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -63,14 +62,22 @@ export default function CalendarPage() {
 
       {/* Event details pop-out */}
       {selectedEvent && (
-        <div className="fixed top-0 right-0 w-1/3 h-full bg-white shadow-lg p-4">
+        <div
+          className="fixed top-0 right-0 w-1/3 h-full bg-white shadow-lg p-4 z-50"
+          style={{ zIndex: 50 }} // Ensure pop-out is in front of the calendar
+        >
           <h2 className="text-xl font-bold">{selectedEvent.title}</h2>
           <p><strong>Date:</strong> {selectedEvent.date}</p>
           <p><strong>Start Time:</strong> {selectedEvent.start}</p>
           <p><strong>Room:</strong> {selectedEvent.roomNumber}</p>
           <p><strong>Building:</strong> {selectedEvent.buildingName}</p>
           <p><strong>Details:</strong> {selectedEvent.details}</p>
-          <button onClick={closeEventPopOut} className="mt-4 bg-red-500 text-white p-2 rounded">Close</button>
+          <button
+            onClick={closeEventPopOut}
+            className="mt-4 bg-red-500 text-white p-2 rounded"
+          >
+            Close
+          </button>
         </div>
       )}
     </div>
