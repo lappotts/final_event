@@ -47,7 +47,7 @@ export default function AdminPage() {
       const pendingQuery = query(eventsRef, where("isApproved", "==", false));
       const pendingSnapshot = await getDocs(pendingQuery);
       const fetchedPendingEvents: Event[] = pendingSnapshot.docs.map((doc) => ({
-        id: doc.id,
+        id: doc.id, // Ensure doc.id is a string
         workers: [],
         eventName: doc.data().eventName || "", // Default value if missing
         details: doc.data().details || "", // Default value if missing
@@ -60,7 +60,7 @@ export default function AdminPage() {
       const approvedQuery = query(eventsRef, where("isApproved", "==", true));
       const approvedSnapshot = await getDocs(approvedQuery);
       const fetchedAllEvents: Event[] = approvedSnapshot.docs.map((doc) => ({
-        id: doc.id,
+        id: doc.id, // Ensure doc.id is a string
         workers: [],
         eventName: doc.data().eventName || "", // Default value if missing
         details: doc.data().details || "", // Default value if missing
@@ -80,7 +80,7 @@ export default function AdminPage() {
       const querySnapshot = await getDocs(q);
 
       const fetchedWorkers: Worker[] = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
+        id: doc.id, // Ensure doc.id is a string
         ...doc.data(),
       })) as Worker[];
       setWorkers(fetchedWorkers);
@@ -98,6 +98,7 @@ export default function AdminPage() {
   fetchEvents();
   fetchWorkers();
 }, []);
+
 
 
   const handleAssignWorker = async (eventId: string, workerId: string) => {
