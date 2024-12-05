@@ -47,26 +47,26 @@ export default function AdminPage() {
       const pendingQuery = query(eventsRef, where("isApproved", "==", false));
       const pendingSnapshot = await getDocs(pendingQuery);
       const fetchedPendingEvents: Event[] = pendingSnapshot.docs.map((doc) => ({
-        id: doc.id, // Ensure doc.id is a string
+        id: doc.id, // Ensure id is always defined
         workers: [],
         eventName: doc.data().eventName || "", // Default value if missing
         details: doc.data().details || "", // Default value if missing
         isApproved: doc.data().isApproved || false, // Default value if missing
         ...doc.data(),
-      })) as Event[];
+      })) as Event[]; // Assert as Event[] type
       setPendingEvents(fetchedPendingEvents);
 
       // Fetch all approved events
       const approvedQuery = query(eventsRef, where("isApproved", "==", true));
       const approvedSnapshot = await getDocs(approvedQuery);
       const fetchedAllEvents: Event[] = approvedSnapshot.docs.map((doc) => ({
-        id: doc.id, // Ensure doc.id is a string
+        id: doc.id, // Ensure id is always defined
         workers: [],
         eventName: doc.data().eventName || "", // Default value if missing
         details: doc.data().details || "", // Default value if missing
         isApproved: doc.data().isApproved || false, // Default value if missing
         ...doc.data(),
-      })) as Event[];
+      })) as Event[]; // Assert as Event[] type
       setAllEvents(fetchedAllEvents);
     } catch (error) {
       console.error("Error fetching events:", error);
@@ -80,7 +80,7 @@ export default function AdminPage() {
       const querySnapshot = await getDocs(q);
 
       const fetchedWorkers: Worker[] = querySnapshot.docs.map((doc) => ({
-        id: doc.id, // Ensure doc.id is a string
+        id: doc.id, // Ensure id is always defined
         ...doc.data(),
       })) as Worker[];
       setWorkers(fetchedWorkers);
@@ -98,6 +98,7 @@ export default function AdminPage() {
   fetchEvents();
   fetchWorkers();
 }, []);
+
 
 
 
